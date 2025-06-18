@@ -15,10 +15,13 @@
 #include "stm32f4xx_hal_gpio.h"
 #include "isotp.h"
 
-IsoTpLink g_link;
-IsoTpLink g_link2;
-IsoTpLink g_link3;
+
 IsoTpLink comm_link;
+
+extern lwrb_t buff;
+extern struct sensor_state sensor1;
+extern struct sensor_state sensor2;
+extern struct sensor_state sensor3;
 
 int
 main (void)
@@ -61,12 +64,12 @@ main (void)
         else
         {
             print_to_can();
-            print_to_stdout();
+            manikin_cli_flush(&buff);
             count = 0;
         }
-        isotp_poll(&g_link);
-        isotp_poll(&g_link2);
-        isotp_poll(&g_link3);
+        isotp_poll(&(sensor1.iso_tp_link));
+        isotp_poll(&(sensor2.iso_tp_link));
+        isotp_poll(&(sensor3.iso_tp_link));
         isotp_poll(&comm_link);
         __WFI();
     }

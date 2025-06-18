@@ -13,10 +13,11 @@
 
 #include "isotp.h"
 #include "../session_mgmt/session_mgmt.h"
+#include "sampling.h"
 
-extern IsoTpLink g_link;
-extern IsoTpLink g_link2;
-extern IsoTpLink g_link3;
+extern struct sensor_state sensor1;
+extern struct sensor_state sensor2;
+extern struct sensor_state sensor3;
 extern IsoTpLink comm_link;
 
 /* Alloc send and receive buffer statically in RAM */
@@ -124,15 +125,15 @@ HAL_CAN_RxFifo0MsgPendingCallback (CAN_HandleTypeDef *hcan)
     {
         if (rx_header.StdId == BOARD_CONF_CAN_SENSOR1_RX_ID)
         {
-            isotp_on_can_message(&g_link, rx_data, rx_header.DLC);
+            isotp_on_can_message(&(sensor1.iso_tp_link), rx_data, rx_header.DLC);
         } else if(rx_header.StdId == BOARD_CONF_CAN_SENSOR2_RX_ID) {
-            isotp_on_can_message(&g_link2, rx_data, rx_header.DLC);
+            isotp_on_can_message(&(sensor2.iso_tp_link), rx_data, rx_header.DLC);
         } else if(rx_header.StdId == BOARD_CONF_CAN_STATUS_RX_ID) {
             isotp_on_can_message(&comm_link,rx_data, rx_header.DLC);
         } else if(rx_header.StdId == BOARD_CONF_CAN_GLOBAL_BRDCAST_RX_ID) {
             session_mgmt_on_global_can_msg(rx_data, rx_header.DLC);
         } else if(rx_header.StdId == BOARD_CONF_CAN_SENSOR3_RX_ID) {
-            isotp_on_can_message(&g_link3,rx_data, rx_header.DLC);
+            isotp_on_can_message(&(sensor3.iso_tp_link),rx_data, rx_header.DLC);
         }
     }
 }
@@ -234,14 +235,14 @@ init_can (void)
 
     (void)can_phy_hal_init_can_mcu(BOARD_CONF_CAN_SPEED);
     (void)can_phy_hal_set_filter();
-    isotp_init_link(&g_link, BOARD_CONF_CAN_SENSOR1_TX_ID,
+    isotp_init_link(&(sensor1.iso_tp_link), BOARD_CONF_CAN_SENSOR1_TX_ID,
         g_isotpSendBuf, sizeof(g_isotpSendBuf), 
         g_isotpRecvBuf, sizeof(g_isotpRecvBuf));
     
-    isotp_init_link(&g_link2, BOARD_CONF_CAN_SENSOR2_TX_ID,
+    isotp_init_link(&(sensor2.iso_tp_link), BOARD_CONF_CAN_SENSOR2_TX_ID,
             g_isotpSendBuf2, sizeof(g_isotpSendBuf2), 
             g_isotpRecvBuf2, sizeof(g_isotpRecvBuf2));
-    isotp_init_link(&g_link3, BOARD_CONF_CAN_SENSOR3_TX_ID,
+    isotp_init_link(&(sensor3.iso_tp_link), BOARD_CONF_CAN_SENSOR3_TX_ID,
             g_isotpSendBuf4, sizeof(g_isotpSendBuf4), 
             g_isotpRecvBuf4, sizeof(g_isotpRecvBuf4));
 

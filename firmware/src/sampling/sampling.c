@@ -3,7 +3,7 @@
 #include <cmsis_gcc.h>
 #include <stm32f4xx_hal.h>
 #include <stm32f4xx_hal_gpio.h>
-
+#include "sampling.h"
 #include "i2c/i2c.h"
 #include "board_conf.h"
 #include "common/manikin_types.h"
@@ -15,6 +15,7 @@
 #include "can_wrapper.h"
 #include "isotp.h"
 #include "vl6180x/vl6180x.h"
+#include "private/sampling_data_types.h"
 
 #define MAX_SAMPLE_SIZE                                         \
     ((sizeof(sample_sensor1_t) > sizeof(sample_sensor2_t))      \
@@ -26,78 +27,44 @@
                 : sizeof(sample_sensor3_t)))
 
 /* Buffers */
-static lwrb_t  buff;
+lwrb_t  buff;
 static uint8_t buff_data[1024];
-
 static uint8_t cbor_buff[512];
-static uint8_t std_out_buf[1024];
-
-struct sensor_state
-{
-    sample_timer_ctx_t   timer_ctx;
-    manikin_sensor_ctx_t sensor_ctx;
-    IsoTpLink            iso_tp_link;
-    size_t               sample_id;
-    lwrb_t               can_ringbuffer;
-    uint8_t              can_ringbuffer_data[512];
-};
 
 
 #if BOARD_CONF_USE_SENSOR1
-struct sensor_state sensor1 = { 0 };
+struct sensor_state sensor1 = { 0U };
 volatile uint8_t    sensor_timer_1_trigger;
 #endif
 #if BOARD_CONF_USE_SENSOR2
-struct sensor_state sensor2 = { 0 };
+struct sensor_state sensor2 = { 0U };
 volatile uint8_t    sensor_timer_2_trigger;
 #endif
 #if BOARD_CONF_USE_SENSOR3
-struct sensor_state sensor3 = { 0 };
+struct sensor_state sensor3 = { 0U };
 volatile uint8_t    sensor_timer_3_trigger;
 
 #endif
-
-/* CAN data packaging */
-typedef struct
-{
-    char                        sensor_name[8];
-    uint32_t                    frame_id;
-    BOARD_CONF_SENSOR1_SAMPLE_T data;
-} sample_sensor1_t;
-
-typedef struct
-{
-    char                        sensor_name[8];
-    uint32_t                    frame_id;
-    BOARD_CONF_SENSOR2_SAMPLE_T data;
-} sample_sensor2_t;
-
-typedef struct
-{
-    char                        sensor_name[8];
-    uint32_t                    frame_id;
-    BOARD_CONF_SENSOR3_SAMPLE_T data;
-} sample_sensor3_t;
 
 /* Timer interrupt handler */
 void
 sample_irq (TIM_TypeDef *tim)
 {
 #if BOARD_CONF_USE_SENSOR1
-    if (tim == BOARD_CONF_TIMER_SENSOR_1)
+    if (BOARD_CONF_TIMER_SENSOR_1 == tim)
     {
         sensor_timer_1_trigger = 1U;
     }
 #endif
 
 #if BOARD_CONF_USE_SENSOR2
-    if (tim == BOARD_CONF_TIMER_SENSOR_2)
+    if (BOARD_CONF_TIMER_SENSOR_2 == tim)
     {
         sensor_timer_2_trigger = 1U;
     }
 #endif
 #if BOARD_CONF_USE_SENSOR3
-    if (tim == BOARD_CONF_TIMER_SENSOR_3)
+    if (BOARD_CONF_TIMER_SENSOR_3 == tim)
     {
         sensor_timer_3_trigger = 1U;
     }
@@ -166,7 +133,7 @@ init_i2c1_pins (void)
     return MANIKIN_STATUS_OK;
 }
 
-static manikin_status_t
+static inline manikin_status_t
 init_i2c_sensor_struct (struct sensor_state *sensor,
                         I2C_TypeDef         *i2c_inst,
                         uint8_t              i2c_addr,
@@ -449,14 +416,7 @@ check_and_sample_sensor3 (uint8_t *data_buf)
 
     return status;
 }
-/* Send data over USB CDC */
-manikin_status_t
-print_to_stdout (void)
-{
-    uint32_t len = lwrb_read(&buff, std_out_buf, sizeof(std_out_buf));
-    (void)CDC_Transmit_FS(std_out_buf, len);
-    return MANIKIN_STATUS_OK;
-}
+
 
 /* Send data over CAN using ISO-TP */
 manikin_status_t

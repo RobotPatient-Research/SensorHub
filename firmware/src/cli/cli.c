@@ -18,7 +18,7 @@ static cbor_writer_t writer;
 
 /* Handle input from CDC (USB serial) */
 void
-cli_on_input (uint8_t *buf, uint32_t len)
+manikin_cli_on_input (uint8_t *buf, uint32_t len)
 {
     if ((len == 1U) && (buf[0] == '\r'))
     {
@@ -75,4 +75,19 @@ void
 manikin_cli_init (void)
 {
     lwrb_init(&cli_buffer, cli_buffer_data, sizeof(cli_buffer_data));
+}
+
+
+/* Send data over USB CDC */
+manikin_status_t
+print_to_stdout (void)
+{
+
+    return MANIKIN_STATUS_OK;
+}
+
+manikin_status_t manikin_cli_flush(lwrb_t *buffer) {
+    uint32_t len = lwrb_read(buffer, cli_buffer_data, sizeof(cli_buffer_data));
+    (void)CDC_Transmit_FS(cli_buffer_data, len);
+    return MANIKIN_STATUS_OK;
 }

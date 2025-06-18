@@ -50,7 +50,8 @@ add_compile_options(-g3
     $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
     $<$<COMPILE_LANGUAGE:CXX>:-fno-use-cxa-atexit>
     -fmacro-prefix-map=${CMAKE_CURRENT_LIST_DIR}/=/
-    -DLFS_YES_TRACE)
+    -DLFS_YES_TRACE
+    -DLWRB_DISABLE_ATOMIC)
 
 # We need to download the full cube hal for the F4 USB middleware
 stm32_fetch_cube(F4)
@@ -81,30 +82,6 @@ FetchContent_Declare(cbor
                       GIT_TAG main
 )
 FetchContent_MakeAvailable(cbor)
-
-# Add seperate USB_device target containing all usb middleware
-add_library(USB_device ${CMAKE_CURRENT_LIST_DIR}/src/usb/usbd_conf_template.c
-    ${CMAKE_BINARY_DIR}/_deps/stm32cubef4-src/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c
-    ${CMAKE_BINARY_DIR}/_deps/stm32cubef4-src/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c
-    ${CMAKE_BINARY_DIR}/_deps/stm32cubef4-src/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_desc_template.c
-    ${CMAKE_BINARY_DIR}/_deps/stm32cubef4-src/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c
-    ${CMAKE_BINARY_DIR}/_deps/stm32cubef4-src/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc_if_template.c
-    ${CMAKE_BINARY_DIR}/_deps/stm32cubef4-src/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c)
-target_include_directories(USB_device PUBLIC ${CMAKE_BINARY_DIR}/_deps/stm32cubef4-src/Middlewares/ST/STM32_USB_Device_Library/Core/Inc
-    ${CMAKE_BINARY_DIR}/_deps/stm32cubef4-src/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc
-    ${CMAKE_BINARY_DIR}/_deps/stm32cubef4-src/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Inc
-    ${CMAKE_CURRENT_LIST_DIR}/src/usb)
-target_link_libraries(USB_device CMSIS::STM32::F405RG HAL::STM32::F4::LL_USB HAL::STM32::F4::PCDEx)
-
-add_library(USB_device_conf ${CMAKE_CURRENT_LIST_DIR}/src/usb/usb_device.c
-    ${CMAKE_CURRENT_LIST_DIR}/src/usb/usbd_cdc_if.c
-    ${CMAKE_CURRENT_LIST_DIR}/src/usb/usbd_conf.c
-    ${CMAKE_CURRENT_LIST_DIR}/src/usb/usbd_desc.c
-    src/cli/cli.c)
-target_include_directories(USB_device_conf PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src/usb ${CMAKE_CURRENT_LIST_DIR}/src/hooks ${CMAKE_CURRENT_LIST_DIR}/src/cli)
-target_link_libraries(cbor CMSIS::STM32::F405RG)
-target_link_libraries(USB_device_conf USB_device CMSIS::STM32::F405RG lwrb cbor)
-
 # Pull in the sensor & flash drivers for this project
 set(PLATFORM_DEFINED STM32F4)
 FetchContent_Declare(
@@ -114,6 +91,31 @@ FetchContent_Declare(
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/external/Manikin_Software_Libraries_V3
 )
 FetchContent_MakeAvailable(Manikin_Software_Libraries_V3)
+
+# Add seperate USB_device target containing all usb middleware
+add_library(USB_device ${CMAKE_CURRENT_LIST_DIR}/config/system_hooks/usb/usbd_conf_template.c
+    ${CMAKE_BINARY_DIR}/_deps/stm32cubef4-src/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c
+    ${CMAKE_BINARY_DIR}/_deps/stm32cubef4-src/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c
+    ${CMAKE_BINARY_DIR}/_deps/stm32cubef4-src/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_desc_template.c
+    ${CMAKE_BINARY_DIR}/_deps/stm32cubef4-src/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c
+    ${CMAKE_BINARY_DIR}/_deps/stm32cubef4-src/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc_if_template.c
+    ${CMAKE_BINARY_DIR}/_deps/stm32cubef4-src/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c)
+target_include_directories(USB_device PUBLIC ${CMAKE_BINARY_DIR}/_deps/stm32cubef4-src/Middlewares/ST/STM32_USB_Device_Library/Core/Inc
+    ${CMAKE_BINARY_DIR}/_deps/stm32cubef4-src/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc
+    ${CMAKE_BINARY_DIR}/_deps/stm32cubef4-src/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Inc
+    ${CMAKE_CURRENT_LIST_DIR}/config/system_hooks/usb)
+target_link_libraries(USB_device CMSIS::STM32::F405RG HAL::STM32::F4::LL_USB HAL::STM32::F4::PCDEx)
+
+add_library(USB_device_conf ${CMAKE_CURRENT_LIST_DIR}/config/system_hooks/usb/usb_device.c
+    ${CMAKE_CURRENT_LIST_DIR}/config/system_hooks/usb/usbd_cdc_if.c
+    ${CMAKE_CURRENT_LIST_DIR}/config/system_hooks/usb/usbd_conf.c
+    ${CMAKE_CURRENT_LIST_DIR}/config/system_hooks/usb/usbd_desc.c
+    src/cli/cli.c)
+target_include_directories(USB_device_conf PUBLIC ${CMAKE_CURRENT_LIST_DIR}/config/system_hooks/usb ${CMAKE_CURRENT_LIST_DIR}/config/system_hooks ${CMAKE_CURRENT_LIST_DIR}/src/cli)
+target_link_libraries(cbor CMSIS::STM32::F405RG)
+target_link_libraries(USB_device_conf USB_device CMSIS::STM32::F405RG lwrb cbor manikin_software_libraries)
+
+
 
 # Pull in SEGGER RTT for debug statements
 FetchContent_Declare(
@@ -148,15 +150,15 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(isotp)
 
 set(MANIKIN_PHY_CAN_PLATFORM "STM32F4")
-add_subdirectory(src/manikin_software_hooks)
+add_subdirectory(config/manikin_software_hooks)
 target_link_libraries(manikin_software_libraries manikin_software_hooks)
 target_link_libraries(isotp CMSIS::STM32::F405RG)
 # Create and link the target executable
 add_executable(${PROJECT_NAME} src/main.cpp 
-                               src/hooks/syscalls.c 
-                               src/hooks/hal_msp.c 
-                               src/hooks/interrupt_handler.c 
-                               src/hooks/error_handling.c 
+                               config/system_hooks/syscalls.c 
+                               config/system_hooks/hal_msp.c 
+                               config/system_hooks/interrupt_handler.c 
+                               config/system_hooks/error_handling.c 
                                src/sampling/sampling.c 
                                src/flash/flash.c 
                                src/can/can_wrapper.c

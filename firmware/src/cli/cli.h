@@ -4,10 +4,12 @@
 extern "C"
 {
 #endif
+#include <lwrb/lwrb.h>
+#include <common/manikin_types.h>
 #include "stdint.h"
 #include "stddef.h"
 
-    void cli_on_input(uint8_t *buf, uint32_t len);
+    void manikin_cli_on_input(uint8_t *buf, uint32_t len);
 
     /**
      * @brief This function get's called when a new sample has been read from
@@ -20,6 +22,8 @@ extern "C"
                                             const uint8_t *buffer,
                                             size_t         len);
 
+
+    manikin_status_t manikin_cli_flush(lwrb_t *buffer);
     void manikin_cli_init();
 
 #ifdef __cplusplus
