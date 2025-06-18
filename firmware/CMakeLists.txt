@@ -16,13 +16,13 @@ FetchContent_Declare(
     stm32-cmake
     GIT_REPOSITORY https://github.com/ObKo/stm32-cmake.git
     GIT_TAG v2.1.0
-    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/board_sdk/stm32-cmake
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/external/stm32-cmake
 )
 
 # Download
 FetchContent_MakeAvailable(stm32-cmake)
 # Set Toolchain-file so that CMake knows what toolchain to use, with which linker & compilation options
-set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/board_sdk/stm32-cmake/cmake/stm32_gcc.cmake)
+set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/external/stm32-cmake/cmake/stm32_gcc.cmake)
 
 project(STM32F4_Sensor_Node C CXX ASM)
 
@@ -72,7 +72,7 @@ FetchContent_Declare(
     LWRB
     GIT_REPOSITORY https://github.com/MaJerle/lwrb.git
     GIT_TAG v3.2.0
-    SOURCE_DIR {CMAKE_CURRENT_LIST_DIR}/lib/lwrb
+    SOURCE_DIR {CMAKE_CURRENT_LIST_DIR}/external/lwrb
 )
 FetchContent_MakeAvailable(LWRB)
 
@@ -111,7 +111,7 @@ FetchContent_Declare(
     Manikin_Software_Libraries_V3
     GIT_REPOSITORY https://github.com/RobotPatient/Manikin_Software_Libraries_V3.git
     GIT_TAG dev
-    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/Manikin_Software_Libraries_V3
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/external/Manikin_Software_Libraries_V3
 )
 FetchContent_MakeAvailable(Manikin_Software_Libraries_V3)
 
@@ -120,7 +120,7 @@ FetchContent_Declare(
     SEGGER_RTT
     GIT_REPOSITORY https://github.com/SEGGERMicro/RTT.git
     GIT_TAG master
-    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/RTT
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/external/RTT
 )
 FetchContent_MakeAvailable(SEGGER_RTT)
 
@@ -129,21 +129,21 @@ FetchContent_Declare(
     LITTLEFS
     GIT_REPOSITORY https://github.com/littlefs-project/littlefs
     GIT_TAG v2.10.2
-    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/littlefs
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/external/littlefs
 )
 FetchContent_MakeAvailable(LITTLEFS)
 
-add_library(littlefs lib/littlefs/lfs_util.c
-                     lib/littlefs/lfs.c
+add_library(littlefs external/littlefs/lfs_util.c
+                     external/littlefs/lfs.c
                     )
-target_include_directories(littlefs PUBLIC lib/littlefs)
+target_include_directories(littlefs PUBLIC external/littlefs)
 target_link_libraries(littlefs CMSIS::STM32::F405RG)
 
 FetchContent_Declare(
     isotp
     GIT_REPOSITORY https://github.com/SimonCahill/isotp-c.git
     GIT_TAG master
-    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/isotp
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/external/isotp
 )
 FetchContent_MakeAvailable(isotp)
 
@@ -157,13 +157,13 @@ add_executable(${PROJECT_NAME} src/main.cpp
                                src/hooks/hal_msp.c 
                                src/hooks/interrupt_handler.c 
                                src/hooks/error_handling.c 
-                               src/sampling.c 
+                               src/sampling/sampling.c 
                                src/flash/flash.c 
                                src/can/can_wrapper.c
                                src/session_mgmt/session_mgmt.c
-                               lib/RTT/RTT/SEGGER_RTT.c 
-                               lib/RTT/RTT/SEGGER_RTT_printf.c 
-                               lib/RTT/Syscalls/SEGGER_RTT_Syscalls_GCC.c)
+                               external/RTT/RTT/SEGGER_RTT.c 
+                               external/RTT/RTT/SEGGER_RTT_printf.c 
+                               external/RTT/Syscalls/SEGGER_RTT_Syscalls_GCC.c)
 
 target_link_libraries(${PROJECT_NAME} CMSIS::STM32::F405RG 
                                       HAL::STM32::F4::CORTEX 
@@ -180,6 +180,6 @@ target_link_libraries(${PROJECT_NAME} CMSIS::STM32::F405RG
                                       isotp
                                       )
 
-target_include_directories(${PROJECT_NAME} PUBLIC src/hooks src/can src/flash lib/RTT/Config lib/RTT/RTT lib/iso-tp)
+target_include_directories(${PROJECT_NAME} PUBLIC src/hooks src/can src/sampling src/flash external/RTT/Config external/RTT/RTT external/iso-tp)
 stm32_print_size_of_target(${PROJECT_NAME})
 stm32_generate_hex_file(${PROJECT_NAME})

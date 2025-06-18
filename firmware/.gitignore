@@ -42,7 +42,7 @@ board_sdk
 *.user
 
 # Fetched libraries
-lib/
+external/
 
 # Mac Os files
 .DS_Store

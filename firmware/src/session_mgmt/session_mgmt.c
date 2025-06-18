@@ -3,14 +3,14 @@
 #include "common/manikin_types.h"
 #include <usbd_cdc_if.h>
 #include <stdint.h>
-#include "../sampling.h"
+#include "../sampling/sampling.h"
 #include "isotp.h"
 
 extern IsoTpLink comm_link;
-extern size_t    sensor1_sample_id;
-extern size_t    sensor2_sample_id;
+ size_t    sensor1_sample_id;
+ size_t    sensor2_sample_id;
 #if BOARD_CONF_USE_SENSOR3
-extern size_t sensor3_sample_id;
+ size_t sensor3_sample_id;
 #endif
 
 typedef enum
