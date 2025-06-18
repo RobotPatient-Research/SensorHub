@@ -31,5 +31,25 @@
 *.out
 *.app
 
+# build folders
+build/
+cmake-build*
+
+# Fetched board-sdk
+board_sdk
+
+# Ozone tmp debug file
+*.user
+
+# Fetched libraries
+lib/
+
+# Mac Os files
 .DS_Store
-*/.DS_Store
+
+# IDE folders
+.vscode/
+.idea/
+.cache/
+
+src/RTT
