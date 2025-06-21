@@ -2,13 +2,12 @@
 #include "session_mgmt/session_mgmt.h"
 #include "usb_device.h"
 #include "hal_msp.h"
-#include <cstdint>
+#include <stdint.h>
 #include "sampling.h"
 #include "stm32f4xx_hal.h"
 #include "flash.h"
 #include "can_wrapper.h"
 #include "cli.h"
-#include "isotp.h"
 #include "SEGGER_RTT.h"
 
 int

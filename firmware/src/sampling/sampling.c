@@ -10,7 +10,6 @@
 #include "cli.h"
 #include "lwrb/lwrb.h"
 #include "isotp.h"
-#include "vl6180x/vl6180x.h"
 #include "private/sampling_data_types.h"
 
 #define MAX_SAMPLE_SIZE                                                                                                \
@@ -363,7 +362,6 @@ check_and_sample_sensor3 ()
 }
 #endif
 
-/* Send data over CAN using ISO-TP */
 manikin_status_t
 print_to_can (void)
 {

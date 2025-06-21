@@ -153,7 +153,7 @@ add_subdirectory(config/manikin_software_hooks)
 target_link_libraries(manikin_software_libraries manikin_software_hooks)
 target_link_libraries(isotp CMSIS::STM32::F405RG)
 # Create and link the target executable
-add_executable(${PROJECT_NAME} src/main.cpp
+add_executable(${PROJECT_NAME} src/main.c
         config/system_hooks/syscalls.c
         config/system_hooks/hal_msp.c
         config/system_hooks/interrupt_handler.c
