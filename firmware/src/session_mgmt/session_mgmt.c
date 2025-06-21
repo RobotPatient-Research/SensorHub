@@ -7,7 +7,6 @@
 #include "isotp.h"
 #include "SEGGER_RTT.h"
 
-extern IsoTpLink comm_link;
 #if BOARD_CONF_USE_SENSOR1
 size_t sensor1_sample_id;
 #endif
@@ -18,6 +17,10 @@ size_t sensor2_sample_id;
 size_t sensor3_sample_id;
 #endif
 uint8_t comm_buf[128];
+
+IsoTpLink      comm_link;
+static uint8_t command_link_isotp_rx_buf[128];
+static uint8_t command_link_isotp_tx_buf[128];
 
 typedef enum
 {
@@ -91,6 +94,12 @@ session_mgmt_init ()
     memcpy((system_status.sensor2_name),
            BOARD_CONF_SENSOR2_NAME,
            sizeof(BOARD_CONF_SENSOR2_NAME) <= 8 ? sizeof(BOARD_CONF_SENSOR2_NAME) : 8);
+    isotp_init_link(&comm_link,
+                    BOARD_CONF_CAN_STATUS_TX_ID,
+                    command_link_isotp_tx_buf,
+                    sizeof(command_link_isotp_tx_buf),
+                    command_link_isotp_rx_buf,
+                    sizeof(command_link_isotp_rx_buf));
     return MANIKIN_STATUS_OK;
 }
 

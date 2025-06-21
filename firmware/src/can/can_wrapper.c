@@ -34,10 +34,6 @@ static uint8_t             sensor3_isotp_rx_buf[128];
 static uint8_t             sensor3_isotp_tx_buf[128];
 #endif
 
-IsoTpLink      comm_link;
-static uint8_t command_link_isotp_rx_buf[128];
-static uint8_t command_link_isotp_tx_buf[128];
-
 /* Static CAN handle structures */
 CAN_HandleTypeDef          can_handle;
 static CAN_FilterTypeDef   can_filter;
@@ -274,12 +270,6 @@ init_can (void)
                     sensor3_isotp_rx_buf,
                     sizeof(sensor3_isotp_rx_buf));
 #endif
-    isotp_init_link(&comm_link,
-                    BOARD_CONF_CAN_STATUS_TX_ID,
-                    command_link_isotp_tx_buf,
-                    sizeof(command_link_isotp_tx_buf),
-                    command_link_isotp_rx_buf,
-                    sizeof(command_link_isotp_rx_buf));
 }
 
 /* Reset CAN peripheral */
