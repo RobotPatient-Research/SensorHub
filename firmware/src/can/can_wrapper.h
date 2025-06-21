@@ -13,6 +13,7 @@ extern "C"
     void init_can();
     /**
      * @brief Transmit data over CAN as soon as bus comes free
+     * @param arb_id Arbitration id for the message (priority and type)
      * @param data Pointer to the write-buffer
      * @param len The number of bytes to write
      */

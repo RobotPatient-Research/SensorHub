@@ -6,8 +6,15 @@ extern "C"
 #endif
 #include "lfs.h"
 
+    /**
+     * @brief This type exports the in the source-file initialized littlefs binding.
+     */
     extern struct lfs_config lfs_flash_cfg;
-    void                     init_spi_flash_memory();
+
+    /**
+     * @brief This function initializes the SPI flash driver with littlefs for wear-leveling and file-based access
+     */
+    void init_spi_flash_memory();
 
 #ifdef __cplusplus
 }

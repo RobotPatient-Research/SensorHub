@@ -101,52 +101,46 @@ extern "C"
  * Sensor 1 configuration
  */
 #if BOARD_CONF_USE_SENSOR1
-#define BOARD_CONF_SENSOR1_NAME             "vl6180"
-#define BOARD_CONF_SENSOR1_RESET_PORT       GPIOA
-#define BOARD_CONF_SENSOR1_RESET_PIN        GPIO_PIN_9
-#define BOARD_CONF_SENSOR1_ADDR             0x29
-#define BOARD_CONF_SENSOR1_SAMPLE_RATE_HZ   100
-#define BOARD_CONF_SENSOR1_INIT(sensor_ctx) vl6180x_init_sensor(sensor_ctx)
-#define BOARD_CONF_SENSOR1_SAMPLE(sensor_ctx, read_buf) \
-    vl6180x_read_sensor(sensor_ctx, read_buf)
-#define BOARD_CONF_SENSOR1_DEINIT(sensor_ctx) vl6180x_deinit_sensor(sensor_ctx)
-#define BOARD_CONF_SENSOR1_SAMPLE_T           vl6180x_sample_data_t
-#define BOARD_CONF_SENSOR1_SAMPLE_PARSE(read_buf, sample_data) \
-    vl6180x_parse_raw_data(read_buf, sample_data)
+#define BOARD_CONF_SENSOR1_NAME                                "vl6180"
+#define BOARD_CONF_SENSOR1_RESET_PORT                          GPIOA
+#define BOARD_CONF_SENSOR1_RESET_PIN                           GPIO_PIN_9
+#define BOARD_CONF_SENSOR1_ADDR                                0x29
+#define BOARD_CONF_SENSOR1_SAMPLE_RATE_HZ                      100
+#define BOARD_CONF_SENSOR1_INIT(sensor_ctx)                    vl6180x_init_sensor(sensor_ctx)
+#define BOARD_CONF_SENSOR1_SAMPLE(sensor_ctx, read_buf)        vl6180x_read_sensor(sensor_ctx, read_buf)
+#define BOARD_CONF_SENSOR1_DEINIT(sensor_ctx)                  vl6180x_deinit_sensor(sensor_ctx)
+#define BOARD_CONF_SENSOR1_SAMPLE_T                            vl6180x_sample_data_t
+#define BOARD_CONF_SENSOR1_SAMPLE_PARSE(read_buf, sample_data) vl6180x_parse_raw_data(read_buf, sample_data)
 #endif // BOARD_CONF_USE_SENSOR1
 
 /**
  * Sensor 2 configuration
  */
 #if BOARD_CONF_USE_SENSOR2
-#define BOARD_CONF_SENSOR2_NAME             "ads7138"
-#define BOARD_CONF_SENSOR2_RESET_PORT       GPIOA
-#define BOARD_CONF_SENSOR2_RESET_PIN        GPIO_PIN_10
-#define BOARD_CONF_SENSOR2_ADDR             0x10
-#define BOARD_CONF_SENSOR2_SAMPLE_RATE_HZ   50
-#define BOARD_CONF_SENSOR2_INIT(sensor_ctx) ads7138_init_sensor(sensor_ctx)
-#define BOARD_CONF_SENSOR2_SAMPLE(sensor_ctx, read_buf) \
-    ads7138_read_sensor(sensor_ctx, read_buf)
-#define BOARD_CONF_SENSOR2_DEINIT(sensor_ctx) ads7138_deinit_sensor(sensor_ctx)
-#define BOARD_CONF_SENSOR2_SAMPLE_T           ads7138_sample_data_t
-#define BOARD_CONF_SENSOR2_SAMPLE_PARSE(read_buf, sample_data) \
-    ads7138_parse_raw_data(read_buf, sample_data)
+#define BOARD_CONF_SENSOR2_NAME                                "ads7138"
+#define BOARD_CONF_SENSOR2_RESET_PORT                          GPIOA
+#define BOARD_CONF_SENSOR2_RESET_PIN                           GPIO_PIN_10
+#define BOARD_CONF_SENSOR2_ADDR                                0x10
+#define BOARD_CONF_SENSOR2_SAMPLE_RATE_HZ                      50
+#define BOARD_CONF_SENSOR2_INIT(sensor_ctx)                    ads7138_init_sensor(sensor_ctx)
+#define BOARD_CONF_SENSOR2_SAMPLE(sensor_ctx, read_buf)        ads7138_read_sensor(sensor_ctx, read_buf)
+#define BOARD_CONF_SENSOR2_DEINIT(sensor_ctx)                  ads7138_deinit_sensor(sensor_ctx)
+#define BOARD_CONF_SENSOR2_SAMPLE_T                            ads7138_sample_data_t
+#define BOARD_CONF_SENSOR2_SAMPLE_PARSE(read_buf, sample_data) ads7138_parse_raw_data(read_buf, sample_data)
 #endif // BOARD_CONF_USE_SENSOR2
 
     /**
      * Sensor 3 configuration
      */
 #if BOARD_CONF_USE_SENSOR3
-#define BOARD_CONF_SENSOR3_NAME             "SDP810"
-#define BOARD_CONF_SENSOR3_ADDR             0x25
-#define BOARD_CONF_SENSOR3_SAMPLE_RATE_HZ   50
-#define BOARD_CONF_SENSOR3_INIT(sensor_ctx) sdp810_init_sensor(sensor_ctx)
-#define BOARD_CONF_SENSOR3_SAMPLE(sensor_ctx, read_buf) \
-    sdp810_read_sensor(sensor_ctx, read_buf)
-#define BOARD_CONF_SENSOR3_DEINIT(sensor_ctx) sdp810_deinit_sensor(sensor_ctx)
-#define BOARD_CONF_SENSOR3_SAMPLE_T           sdp810_sample_data_t
-#define BOARD_CONF_SENSOR3_SAMPLE_PARSE(read_buf, sample_data) \
-    sdp810_parse_raw_data(read_buf, sample_data)
+#define BOARD_CONF_SENSOR3_NAME                                "SDP810"
+#define BOARD_CONF_SENSOR3_ADDR                                0x25
+#define BOARD_CONF_SENSOR3_SAMPLE_RATE_HZ                      50
+#define BOARD_CONF_SENSOR3_INIT(sensor_ctx)                    sdp810_init_sensor(sensor_ctx)
+#define BOARD_CONF_SENSOR3_SAMPLE(sensor_ctx, read_buf)        sdp810_read_sensor(sensor_ctx, read_buf)
+#define BOARD_CONF_SENSOR3_DEINIT(sensor_ctx)                  sdp810_deinit_sensor(sensor_ctx)
+#define BOARD_CONF_SENSOR3_SAMPLE_T                            sdp810_sample_data_t
+#define BOARD_CONF_SENSOR3_SAMPLE_PARSE(read_buf, sample_data) sdp810_parse_raw_data(read_buf, sample_data)
 #endif // BOARD_CONF_USE_SENSOR3
 
     /**

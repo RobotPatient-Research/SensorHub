@@ -8,12 +8,11 @@ extern "C"
 
     manikin_status_t session_mgmt_init();
 
-    manikin_status_t session_mgmt_on_global_can_msg(uint8_t     *msg,
-                                                    const size_t dlc);
+    manikin_status_t session_mgmt_on_global_can_msg(uint8_t *msg, size_t dlc);
 
-    manikin_status_t session_mgmt_on_can_msg(uint8_t *msg, const size_t dlc);
+    manikin_status_t session_mgmt_on_can_msg(uint8_t *msg, size_t dlc);
 
-    manikin_status_t session_mgmt_on_usb_msg(uint8_t *msg, const size_t size);
+    manikin_status_t session_mgmt_on_usb_msg(uint8_t *msg, size_t size);
 
     manikin_status_t session_mgmt_check_for_can_cmd();
 

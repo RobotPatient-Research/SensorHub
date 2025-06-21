@@ -18,17 +18,10 @@ uint8_t flash_prog_buf[W25QXX128_PROG_SIZE];
 
 manikin_spi_memory_ctx_t mem_ctx;
 
-static int lfs_user_read(const struct lfs_config *cfg,
-                         lfs_block_t              block,
-                         lfs_off_t                off,
-                         void                    *buffer,
-                         lfs_size_t               size);
+static int lfs_user_read(const struct lfs_config *cfg, lfs_block_t block, lfs_off_t off, void *buffer, lfs_size_t size);
 
-static int lfs_user_prog(const struct lfs_config *cfg,
-                         lfs_block_t              block,
-                         lfs_off_t                off,
-                         const void              *buffer,
-                         lfs_size_t               size);
+static int lfs_user_prog(
+    const struct lfs_config *cfg, lfs_block_t block, lfs_off_t off, const void *buffer, lfs_size_t size);
 
 static int lfs_user_erase(const struct lfs_config *cfg, lfs_block_t block);
 
@@ -37,12 +30,11 @@ static int lfs_user_sync(const struct lfs_config *cfg);
 // variables used by the filesystem
 lfs_t             lfs;
 struct lfs_config lfs_flash_cfg = {
-    .context
-    = &mem_ctx, // This should be initialized with actual SPI and chip config
-    .read  = lfs_user_read,
-    .prog  = lfs_user_prog,
-    .erase = lfs_user_erase,
-    .sync  = lfs_user_sync,
+    .context = &mem_ctx, // This should be initialized with actual SPI and chip config
+    .read    = lfs_user_read,
+    .prog    = lfs_user_prog,
+    .erase   = lfs_user_erase,
+    .sync    = lfs_user_sync,
 
     .read_size        = W25QXX128_READ_SIZE,
     .prog_size        = W25QXX128_PROG_SIZE,
@@ -91,16 +83,10 @@ init_spi_flash_memory ()
 }
 
 int
-lfs_user_read (const struct lfs_config *cfg,
-               lfs_block_t              block,
-               lfs_off_t                off,
-               void                    *buffer,
-               lfs_size_t               size)
+lfs_user_read (const struct lfs_config *cfg, lfs_block_t block, lfs_off_t off, void *buffer, lfs_size_t size)
 {
     uint32_t addr = block * cfg->block_size + off;
-    if (w25qxx_read(
-            (manikin_spi_memory_ctx_t *)cfg->context, buffer, addr, size)
-        != MANIKIN_MEMORY_RESULT_OK)
+    if (w25qxx_read((manikin_spi_memory_ctx_t *)cfg->context, buffer, addr, size) != MANIKIN_MEMORY_RESULT_OK)
     {
         return LFS_ERR_IO;
     }
@@ -108,19 +94,10 @@ lfs_user_read (const struct lfs_config *cfg,
 }
 
 int
-lfs_user_prog (const struct lfs_config *cfg,
-               lfs_block_t              block,
-               lfs_off_t                off,
-               const void              *buffer,
-               lfs_size_t               size)
+lfs_user_prog (const struct lfs_config *cfg, lfs_block_t block, lfs_off_t off, const void *buffer, lfs_size_t size)
 {
     uint32_t addr = block * cfg->block_size + off;
-    SEGGER_RTT_printf(0,
-                      "PROG: block=%lu off=%lu size=%lu addr=0x%lx\n",
-                      block,
-                      off,
-                      size,
-                      addr);
+    SEGGER_RTT_printf(0, "PROG: block=%lu off=%lu size=%lu addr=0x%lx\n", block, off, size, addr);
 
     if ((addr % 256) + size > 256)
     {
@@ -128,11 +105,7 @@ lfs_user_prog (const struct lfs_config *cfg,
         return LFS_ERR_IO;
     }
 
-    manikin_memory_result_t res
-        = w25qxx_write((manikin_spi_memory_ctx_t *)cfg->context,
-                       (uint8_t *)buffer,
-                       addr,
-                       size);
+    manikin_memory_result_t res = w25qxx_write((manikin_spi_memory_ctx_t *)cfg->context, (uint8_t *)buffer, addr, size);
     if (res != MANIKIN_MEMORY_RESULT_OK)
     {
         SEGGER_RTT_printf(0, "Write failed with code %d\n", res);
@@ -146,8 +119,7 @@ int
 lfs_user_erase (const struct lfs_config *cfg, lfs_block_t block)
 {
     printf("ERASE: block=%lu\n", block);
-    manikin_memory_result_t res
-        = w25qxx_erase_sector((manikin_spi_memory_ctx_t *)cfg->context, block);
+    manikin_memory_result_t res = w25qxx_erase_sector((manikin_spi_memory_ctx_t *)cfg->context, block);
     if (res != MANIKIN_MEMORY_RESULT_OK)
     {
         printf("Erase failed with code %d\n", res);

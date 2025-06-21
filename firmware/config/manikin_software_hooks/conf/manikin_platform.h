@@ -25,8 +25,7 @@ extern "C"
  * @param i2c_addr Address of the I2C device
  * @return 0 if no device acknowledged, 1 if device acknowledged
  */
-#define MANIKIN_I2C_HAL_DEVICE_ACKNOWLEDGE(i2c_inst, i2c_addr) \
-    i2c_hal_device_acknowledge(i2c_inst, i2c_addr);
+#define MANIKIN_I2C_HAL_DEVICE_ACKNOWLEDGE(i2c_inst, i2c_addr) i2c_hal_device_acknowledge(i2c_inst, i2c_addr);
 
 /**
  * @brief Check if any error flags are set on the I2C peripheral
@@ -34,8 +33,7 @@ extern "C"
  * @return 0 if no error condition was detected on bus, 1 if there was an error
  * condition
  */
-#define MANIKIN_I2C_HAL_ERROR_FLAG_CHECK(i2c_inst) \
-    i2c_hal_error_flag_check(i2c_inst);
+#define MANIKIN_I2C_HAL_ERROR_FLAG_CHECK(i2c_inst) i2c_hal_error_flag_check(i2c_inst);
 
 /**
  * @brief Read multiple bytes from an I2C device
@@ -45,8 +43,7 @@ extern "C"
  * @param len Number of bytes to read
  * @return Number of bytes read
  */
-#define MANIKIN_I2C_HAL_READ_BYTES(i2c_inst, i2c_addr, data, len) \
-    i2c_hal_read_bytes(i2c_inst, i2c_addr, data, len)
+#define MANIKIN_I2C_HAL_READ_BYTES(i2c_inst, i2c_addr, data, len) i2c_hal_read_bytes(i2c_inst, i2c_addr, data, len)
 
 /**
  * @brief Write multiple bytes to an I2C device
@@ -56,8 +53,7 @@ extern "C"
  * @param len Number of bytes to write
  * @return Number of bytes written
  */
-#define MANIKIN_I2C_HAL_WRITE_BYTES(i2c_inst, i2c_addr, data, len) \
-    i2c_hal_write_bytes(i2c_inst, i2c_addr, data, len)
+#define MANIKIN_I2C_HAL_WRITE_BYTES(i2c_inst, i2c_addr, data, len) i2c_hal_write_bytes(i2c_inst, i2c_addr, data, len)
 
 /**
  * @brief Deinitialize the I2C peripheral
@@ -81,8 +77,7 @@ extern "C"
  * @param len Number of bytes to send
  * @return Number of bytes written
  */
-#define MANIKIN_SPI_HAL_WRITE_BYTES(spi_inst, data, len) \
-    spi_hal_write_bytes(spi_inst, data, len)
+#define MANIKIN_SPI_HAL_WRITE_BYTES(spi_inst, data, len) spi_hal_write_bytes(spi_inst, data, len)
 
 /**
  * @brief Read multiple bytes from an SPI device
@@ -91,8 +86,7 @@ extern "C"
  * @param len Number of bytes to read
  * @return Number of bytes read
  */
-#define MANIKIN_SPI_HAL_READ_BYTES(spi_inst, data, len) \
-    spi_hal_read_bytes(spi_inst, data, len)
+#define MANIKIN_SPI_HAL_READ_BYTES(spi_inst, data, len) spi_hal_read_bytes(spi_inst, data, len)
 
 /**
  * @brief Control the SPI chip select (CS) line
@@ -115,8 +109,7 @@ extern "C"
  * @param timeout Timeout duration in milliseconds
  * @return Integer value 0 on success, 1 on fail
  */
-#define MANIKIN_WATCHDOG_HAL_TIMER_INIT(watch_inst, timeout) \
-    watchdog_hal_init(watch_inst, timeout)
+#define MANIKIN_WATCHDOG_HAL_TIMER_INIT(watch_inst, timeout) watchdog_hal_init(watch_inst, timeout)
 
 /**
  * @brief Reset (kick) the watchdog timer to prevent reset
@@ -164,8 +157,7 @@ extern "C"
  * @param freq Timer frequency in Hz
  * @return Integer value 0 on success, 1 on fail
  */
-#define MANIKIN_TIMER_HAL_INIT(timer_inst, freq) \
-    timer_hal_init(timer_inst, freq)
+#define MANIKIN_TIMER_HAL_INIT(timer_inst, freq) timer_hal_init(timer_inst, freq)
 
 /**
  * @brief Start a timer
@@ -198,8 +190,7 @@ extern "C"
  * @param hash File identifier or hash
  * @param line Line number where the error occurred
  */
-#define MANIKIN_NON_CRIT_ERROR_HANDLER(hash, line) \
-    non_critical_error(hash, line)
+#define MANIKIN_NON_CRIT_ERROR_HANDLER(hash, line) non_critical_error(hash, line)
 
 #ifdef __cplusplus
 }

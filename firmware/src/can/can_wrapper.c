@@ -94,8 +94,7 @@ can_phy_hal_set_filter (void)
 
     for (uint8_t i = 0; i < num_ids; ++i)
     {
-        uint32_t std_id = ids[i]
-                          << 5; // Shift to align with CAN register format
+        uint32_t std_id = ids[i] << 5; // Shift to align with CAN register format
 
         can_filter.FilterBank           = i; // One filter per ID
         can_filter.FilterMode           = CAN_FILTERMODE_IDLIST;
@@ -131,22 +130,19 @@ HAL_CAN_RxFifo0MsgPendingCallback (CAN_HandleTypeDef *hcan)
 #if BOARD_CONF_USE_SENSOR1
         if (rx_header.StdId == BOARD_CONF_CAN_SENSOR1_RX_ID)
         {
-            isotp_on_can_message(
-                &(sensor1.iso_tp_link), rx_data, rx_header.DLC);
+            isotp_on_can_message(&(sensor1.iso_tp_link), rx_data, rx_header.DLC);
         }
 #endif
 #if BOARD_CONF_USE_SENSOR2
         else if (rx_header.StdId == BOARD_CONF_CAN_SENSOR2_RX_ID)
         {
-            isotp_on_can_message(
-                &(sensor2.iso_tp_link), rx_data, rx_header.DLC);
+            isotp_on_can_message(&(sensor2.iso_tp_link), rx_data, rx_header.DLC);
         }
 #endif
 #if BOARD_CONF_USE_SENSOR3
         else if (rx_header.StdId == BOARD_CONF_CAN_SENSOR3_RX_ID)
         {
-            isotp_on_can_message(
-                &(sensor3.iso_tp_link), rx_data, rx_header.DLC);
+            isotp_on_can_message(&(sensor3.iso_tp_link), rx_data, rx_header.DLC);
         }
 #endif
         else if (rx_header.StdId == BOARD_CONF_CAN_STATUS_RX_ID)
@@ -162,7 +158,7 @@ HAL_CAN_RxFifo0MsgPendingCallback (CAN_HandleTypeDef *hcan)
 
 /* Transmit CAN frame */
 size_t
-can_phy_transmit (uint32_t arb_id, uint8_t *data, size_t len)
+can_phy_transmit (const uint32_t arb_id, uint8_t *data, const size_t len)
 {
     CAN_TxHeaderTypeDef tx_header;
 
@@ -171,8 +167,7 @@ can_phy_transmit (uint32_t arb_id, uint8_t *data, size_t len)
     tx_header.RTR   = CAN_RTR_DATA;
     tx_header.DLC   = (uint8_t)len;
 
-    if (HAL_CAN_AddTxMessage(&can_handle, &tx_header, data, &tx_mailbox)
-        != HAL_OK)
+    if (HAL_CAN_AddTxMessage(&can_handle, &tx_header, data, &tx_mailbox) != HAL_OK)
     {
         return 1;
     }
@@ -187,9 +182,7 @@ can_phy_transmit (uint32_t arb_id, uint8_t *data, size_t len)
 
 /* ISO-TP transport layer: Send CAN message */
 int
-isotp_user_send_can (const uint32_t arbitration_id,
-                     const uint8_t *data,
-                     const uint8_t  size)
+isotp_user_send_can (const uint32_t arbitration_id, const uint8_t *data, const uint8_t size)
 {
     if ((data == NULL) || (size > 8U))
     {
@@ -305,17 +298,17 @@ can_phy_close_can (void)
 }
 
 int
-can_phy_poll ()
+can_phy_poll (void)
 {
-    #if BOARD_CONF_USE_SENSOR1
+#if BOARD_CONF_USE_SENSOR1
     isotp_poll(&(sensor1.iso_tp_link));
-    #endif
-    #if BOARD_CONF_USE_SENSOR2
+#endif
+#if BOARD_CONF_USE_SENSOR2
     isotp_poll(&(sensor2.iso_tp_link));
-    #endif
-    #if BOARD_CONF_USE_SENSOR3
+#endif
+#if BOARD_CONF_USE_SENSOR3
     isotp_poll(&(sensor3.iso_tp_link));
-    #endif
+#endif
     isotp_poll(&comm_link);
     return 0;
 }

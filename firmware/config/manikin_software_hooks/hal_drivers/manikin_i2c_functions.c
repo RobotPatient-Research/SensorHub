@@ -43,9 +43,7 @@ i2c_hal_slave_hang (GPIO_TypeDef *port, uint16_t sda_pin)
 }
 
 void
-i2c_gpio_bitbang_recover (GPIO_TypeDef *port,
-                          uint16_t      scl_pin,
-                          uint16_t      sda_pin)
+i2c_gpio_bitbang_recover (GPIO_TypeDef *port, uint16_t scl_pin, uint16_t sda_pin)
 {
     GPIO_InitTypeDef GPIO_InitStruct = { 0 };
     GPIO_InitStruct.Pin              = scl_pin | sda_pin;
@@ -128,10 +126,7 @@ i2c_hal_error_flag_check (manikin_i2c_inst_t i2c_inst)
 }
 
 size_t
-i2c_hal_read_bytes (manikin_i2c_inst_t i2c_inst,
-                    uint8_t            i2c_addr,
-                    uint8_t           *data,
-                    size_t             len)
+i2c_hal_read_bytes (manikin_i2c_inst_t i2c_inst, uint8_t i2c_addr, uint8_t *data, size_t len)
 {
     handle.Instance = i2c_inst;
     handle.State    = HAL_I2C_STATE_READY;
@@ -143,16 +138,12 @@ i2c_hal_read_bytes (manikin_i2c_inst_t i2c_inst,
 }
 
 size_t
-i2c_hal_write_bytes (manikin_i2c_inst_t i2c_inst,
-                     uint8_t            i2c_addr,
-                     const uint8_t     *data,
-                     size_t             len)
+i2c_hal_write_bytes (manikin_i2c_inst_t i2c_inst, uint8_t i2c_addr, const uint8_t *data, size_t len)
 {
 
     handle.Instance = i2c_inst;
     handle.State    = HAL_I2C_STATE_READY;
-    if (HAL_I2C_Master_Transmit(&handle, i2c_addr, (uint8_t *)data, len, 1)
-        != HAL_OK)
+    if (HAL_I2C_Master_Transmit(&handle, i2c_addr, (uint8_t *)data, len, 1) != HAL_OK)
     {
         return 0;
     }
@@ -187,8 +178,7 @@ i2c_hal_bus_reset (manikin_i2c_inst_t i2c_inst)
 uint32_t
 i2c_hal_get_baud (manikin_i2c_inst_t i2c_inst)
 {
-    uint32_t raw_baud
-        = ((i2c_inst->CR2 & I2C_CR2_FREQ_Msk) >> I2C_CR2_FREQ_Pos) * 1000000U;
+    uint32_t raw_baud = ((i2c_inst->CR2 & I2C_CR2_FREQ_Msk) >> I2C_CR2_FREQ_Pos) * 1000000U;
     if (raw_baud > 35000000 && raw_baud < 45000000)
     {
         return 400000;
