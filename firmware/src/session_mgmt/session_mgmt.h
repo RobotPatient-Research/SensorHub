@@ -15,6 +15,8 @@ extern "C"
 
     manikin_status_t session_mgmt_on_usb_msg(uint8_t *msg, const size_t size);
 
+    manikin_status_t session_mgmt_check_for_can_cmd();
+
     manikin_status_t session_mgmt_deinit();
 
 #ifdef __cplusplus

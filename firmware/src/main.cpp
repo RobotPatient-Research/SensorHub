@@ -11,17 +11,15 @@
 #include "hal_msp.h"
 #include "can_wrapper.h"
 #include "cli.h"
-#include "SEGGER_RTT.h"
 #include "stm32f4xx_hal_gpio.h"
 #include "isotp.h"
+#include "SEGGER_RTT.h"
 
-
-IsoTpLink comm_link;
-
-extern lwrb_t buff;
+extern lwrb_t              buff;
 extern struct sensor_state sensor1;
 extern struct sensor_state sensor2;
 extern struct sensor_state sensor3;
+extern IsoTpLink           comm_link;
 
 int
 main (void)
@@ -37,26 +35,11 @@ main (void)
     init_peripherals_for_sensors();
     HAL_Delay(1);
     init_can();
-    uint8_t  read_buf[16];
-    uint8_t  read_buf2[16];
-    uint8_t  read_buf3[50];
-    uint8_t  comm_buf[128];
-    uint32_t recv_size;
     uint16_t count = 0;
     while (1)
     {
-        int ret
-            = isotp_receive(&comm_link, comm_buf, sizeof(comm_buf), &recv_size);
-        if (ISOTP_RET_OK == ret)
-        {
-            /* Handle received message */
-            SEGGER_RTT_printf(0, "Received %d bytes:\n", recv_size);
-            SEGGER_RTT_printf(0, "%s\n", comm_buf);
-            session_mgmt_on_can_msg(comm_buf, recv_size);
-        }
-        check_and_sample_sensor1(read_buf);
-        check_and_sample_sensor2(read_buf2);
-        check_and_sample_sensor3(read_buf3);
+        session_mgmt_check_for_can_cmd();
+        check_and_sample_sensors();
         if (count < 5)
         {
             count++;
@@ -67,10 +50,7 @@ main (void)
             manikin_cli_flush(&buff);
             count = 0;
         }
-        isotp_poll(&(sensor1.iso_tp_link));
-        isotp_poll(&(sensor2.iso_tp_link));
-        isotp_poll(&(sensor3.iso_tp_link));
-        isotp_poll(&comm_link);
+        can_phy_poll();
         __WFI();
     }
 }

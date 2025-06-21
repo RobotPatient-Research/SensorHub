@@ -15,27 +15,28 @@
 #include "../session_mgmt/session_mgmt.h"
 #include "sampling.h"
 
+#if BOARD_CONF_USE_SENSOR1
 extern struct sensor_state sensor1;
+/* Alloc send and receive buffer statically in RAM */
+static uint8_t sensor1_isotp_rx_buf[128];
+static uint8_t sensor1_isotp_tx_buf[128];
+#endif
+
+#if BOARD_CONF_USE_SENSOR2
 extern struct sensor_state sensor2;
+static uint8_t             sensor2_isotp_rx_buf[128];
+static uint8_t             sensor2_isotp_tx_buf[128];
+#endif
+
+#if BOARD_CONF_USE_SENSOR3
 extern struct sensor_state sensor3;
-extern IsoTpLink comm_link;
+static uint8_t             sensor3_isotp_rx_buf[128];
+static uint8_t             sensor3_isotp_tx_buf[128];
+#endif
 
-/* Alloc send and receive buffer statically in RAM */
-static uint8_t g_isotpRecvBuf[128];
-static uint8_t g_isotpSendBuf[128];
-
-/* Alloc send and receive buffer statically in RAM */
-static uint8_t g_isotpRecvBuf2[128];
-static uint8_t g_isotpSendBuf2[128];
-
-
-/* Alloc send and receive buffer statically in RAM */
-uint8_t g_isotpRecvBuf3[128];
-uint8_t g_isotpSendBuf3[128];
-
-/* Alloc send and receive buffer statically in RAM */
-uint8_t g_isotpRecvBuf4[128];
-uint8_t g_isotpSendBuf4[128];
+IsoTpLink      comm_link;
+static uint8_t command_link_isotp_rx_buf[128];
+static uint8_t command_link_isotp_tx_buf[128];
 
 /* Static CAN handle structures */
 CAN_HandleTypeDef          can_handle;
@@ -85,17 +86,21 @@ can_phy_hal_set_filter (void)
     can_filter.FilterFIFOAssignment = CAN_RX_FIFO0;
     can_filter.FilterActivation     = ENABLE;
     // List of IDs you want to receive
-    uint16_t ids[] = {BOARD_CONF_CAN_SENSOR1_RX_ID, BOARD_CONF_CAN_SENSOR2_RX_ID, BOARD_CONF_CAN_SENSOR3_RX_ID, BOARD_CONF_CAN_STATUS_RX_ID};
-    uint8_t num_ids = sizeof(ids) / sizeof(ids[0]);
+    uint16_t ids[]   = { BOARD_CONF_CAN_SENSOR1_RX_ID,
+                         BOARD_CONF_CAN_SENSOR2_RX_ID,
+                         BOARD_CONF_CAN_SENSOR3_RX_ID,
+                         BOARD_CONF_CAN_STATUS_RX_ID };
+    uint8_t  num_ids = sizeof(ids) / sizeof(ids[0]);
 
     for (uint8_t i = 0; i < num_ids; ++i)
     {
-        uint32_t std_id = ids[i] << 5;  // Shift to align with CAN register format
+        uint32_t std_id = ids[i]
+                          << 5; // Shift to align with CAN register format
 
-        can_filter.FilterBank = i;                          // One filter per ID
-        can_filter.FilterMode = CAN_FILTERMODE_IDLIST;
+        can_filter.FilterBank           = i; // One filter per ID
+        can_filter.FilterMode           = CAN_FILTERMODE_IDLIST;
         can_filter.FilterFIFOAssignment = CAN_RX_FIFO0;
-        can_filter.FilterActivation = ENABLE;
+        can_filter.FilterActivation     = ENABLE;
 
         // Put only this ID into the filter (others zeroed)
         can_filter.FilterIdHigh     = (std_id << 5);
@@ -105,7 +110,7 @@ can_phy_hal_set_filter (void)
 
         if (HAL_CAN_ConfigFilter(&can_handle, &can_filter) != HAL_OK)
         {
-            return 1;  // Error
+            return 1; // Error
         }
     }
     HAL_CAN_ActivateNotification(&can_handle, CAN_IT_RX_FIFO0_MSG_PENDING);
@@ -123,17 +128,34 @@ HAL_CAN_RxFifo0MsgPendingCallback (CAN_HandleTypeDef *hcan)
 
     if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_header, rx_data) == HAL_OK)
     {
+#if BOARD_CONF_USE_SENSOR1
         if (rx_header.StdId == BOARD_CONF_CAN_SENSOR1_RX_ID)
         {
-            isotp_on_can_message(&(sensor1.iso_tp_link), rx_data, rx_header.DLC);
-        } else if(rx_header.StdId == BOARD_CONF_CAN_SENSOR2_RX_ID) {
-            isotp_on_can_message(&(sensor2.iso_tp_link), rx_data, rx_header.DLC);
-        } else if(rx_header.StdId == BOARD_CONF_CAN_STATUS_RX_ID) {
-            isotp_on_can_message(&comm_link,rx_data, rx_header.DLC);
-        } else if(rx_header.StdId == BOARD_CONF_CAN_GLOBAL_BRDCAST_RX_ID) {
+            isotp_on_can_message(
+                &(sensor1.iso_tp_link), rx_data, rx_header.DLC);
+        }
+#endif
+#if BOARD_CONF_USE_SENSOR2
+        else if (rx_header.StdId == BOARD_CONF_CAN_SENSOR2_RX_ID)
+        {
+            isotp_on_can_message(
+                &(sensor2.iso_tp_link), rx_data, rx_header.DLC);
+        }
+#endif
+#if BOARD_CONF_USE_SENSOR3
+        else if (rx_header.StdId == BOARD_CONF_CAN_SENSOR3_RX_ID)
+        {
+            isotp_on_can_message(
+                &(sensor3.iso_tp_link), rx_data, rx_header.DLC);
+        }
+#endif
+        else if (rx_header.StdId == BOARD_CONF_CAN_STATUS_RX_ID)
+        {
+            isotp_on_can_message(&comm_link, rx_data, rx_header.DLC);
+        }
+        else if (rx_header.StdId == BOARD_CONF_CAN_GLOBAL_BRDCAST_RX_ID)
+        {
             session_mgmt_on_global_can_msg(rx_data, rx_header.DLC);
-        } else if(rx_header.StdId == BOARD_CONF_CAN_SENSOR3_RX_ID) {
-            isotp_on_can_message(&(sensor3.iso_tp_link),rx_data, rx_header.DLC);
         }
     }
 }
@@ -235,20 +257,36 @@ init_can (void)
 
     (void)can_phy_hal_init_can_mcu(BOARD_CONF_CAN_SPEED);
     (void)can_phy_hal_set_filter();
-    isotp_init_link(&(sensor1.iso_tp_link), BOARD_CONF_CAN_SENSOR1_TX_ID,
-        g_isotpSendBuf, sizeof(g_isotpSendBuf), 
-        g_isotpRecvBuf, sizeof(g_isotpRecvBuf));
-    
-    isotp_init_link(&(sensor2.iso_tp_link), BOARD_CONF_CAN_SENSOR2_TX_ID,
-            g_isotpSendBuf2, sizeof(g_isotpSendBuf2), 
-            g_isotpRecvBuf2, sizeof(g_isotpRecvBuf2));
-    isotp_init_link(&(sensor3.iso_tp_link), BOARD_CONF_CAN_SENSOR3_TX_ID,
-            g_isotpSendBuf4, sizeof(g_isotpSendBuf4), 
-            g_isotpRecvBuf4, sizeof(g_isotpRecvBuf4));
-
-    isotp_init_link(&comm_link, BOARD_CONF_CAN_STATUS_TX_ID,
-                g_isotpSendBuf3, sizeof(g_isotpSendBuf3), 
-                g_isotpRecvBuf3, sizeof(g_isotpRecvBuf3));
+#if BOARD_CONF_USE_SENSOR1
+    isotp_init_link(&(sensor1.iso_tp_link),
+                    BOARD_CONF_CAN_SENSOR1_TX_ID,
+                    sensor1_isotp_tx_buf,
+                    sizeof(sensor1_isotp_tx_buf),
+                    sensor1_isotp_rx_buf,
+                    sizeof(sensor1_isotp_rx_buf));
+#endif
+#if BOARD_CONF_USE_SENSOR2
+    isotp_init_link(&(sensor2.iso_tp_link),
+                    BOARD_CONF_CAN_SENSOR2_TX_ID,
+                    sensor2_isotp_tx_buf,
+                    sizeof(sensor2_isotp_tx_buf),
+                    sensor2_isotp_rx_buf,
+                    sizeof(sensor2_isotp_rx_buf));
+#endif
+#if BOARD_CONF_USE_SENSOR3
+    isotp_init_link(&(sensor3.iso_tp_link),
+                    BOARD_CONF_CAN_SENSOR3_TX_ID,
+                    sensor3_isotp_tx_buf,
+                    sizeof(sensor3_isotp_tx_buf),
+                    sensor3_isotp_rx_buf,
+                    sizeof(sensor3_isotp_rx_buf));
+#endif
+    isotp_init_link(&comm_link,
+                    BOARD_CONF_CAN_STATUS_TX_ID,
+                    command_link_isotp_tx_buf,
+                    sizeof(command_link_isotp_tx_buf),
+                    command_link_isotp_rx_buf,
+                    sizeof(command_link_isotp_rx_buf));
 }
 
 /* Reset CAN peripheral */
@@ -264,4 +302,20 @@ void
 can_phy_close_can (void)
 {
     (void)HAL_CAN_Stop(&can_handle);
+}
+
+int
+can_phy_poll ()
+{
+    #if BOARD_CONF_USE_SENSOR1
+    isotp_poll(&(sensor1.iso_tp_link));
+    #endif
+    #if BOARD_CONF_USE_SENSOR2
+    isotp_poll(&(sensor2.iso_tp_link));
+    #endif
+    #if BOARD_CONF_USE_SENSOR3
+    isotp_poll(&(sensor3.iso_tp_link));
+    #endif
+    isotp_poll(&comm_link);
+    return 0;
 }

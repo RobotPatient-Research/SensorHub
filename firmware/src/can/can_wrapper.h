@@ -17,6 +17,12 @@ extern "C"
      * @param len The number of bytes to write
      */
     size_t can_phy_transmit(uint32_t arb_id, uint8_t *data, size_t len);
+
+    /**
+     * @brief Check ISOTP links for new messages
+     */
+    int can_phy_poll();
+
 #ifdef __cplusplus
 }
 #endif

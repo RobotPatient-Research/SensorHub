@@ -27,10 +27,9 @@
                 : sizeof(sample_sensor3_t)))
 
 /* Buffers */
-lwrb_t  buff;
+lwrb_t         buff;
 static uint8_t buff_data[1024];
 static uint8_t cbor_buff[512];
-
 
 #if BOARD_CONF_USE_SENSOR1
 struct sensor_state sensor1 = { 0U };
@@ -269,18 +268,20 @@ init_peripherals_for_sensors (void)
     return MANIKIN_STATUS_OK;
 }
 
+#if BOARD_CONF_USE_SENSOR1
 manikin_status_t
-check_and_sample_sensor1 (uint8_t *data_buf)
+check_and_sample_sensor1 ()
 {
     sample_sensor1_t sample;
+    uint8_t          data_buf[2 * sizeof(sample_sensor1_t)];
     memcpy(sample.sensor_name,
            BOARD_CONF_SENSOR1_NAME,
            sizeof(BOARD_CONF_SENSOR1_NAME));
     manikin_status_t status = MANIKIN_STATUS_OK;
     if (sensor_timer_1_trigger)
     {
-        status = sample_timer_start_cb_handler(
-            &(sensor1.timer_ctx), &(sensor1.sensor_ctx));
+        status = sample_timer_start_cb_handler(&(sensor1.timer_ctx),
+                                               &(sensor1.sensor_ctx));
         if (status == MANIKIN_STATUS_OK)
         {
             status = BOARD_CONF_SENSOR1_SAMPLE(&(sensor1.sensor_ctx), data_buf);
@@ -317,19 +318,22 @@ check_and_sample_sensor1 (uint8_t *data_buf)
 
     return MANIKIN_STATUS_OK;
 }
+#endif
 
+#if BOARD_CONF_USE_SENSOR2
 manikin_status_t
-check_and_sample_sensor2 (uint8_t *data_buf)
+check_and_sample_sensor2 ()
 {
     sample_sensor2_t sample;
+    uint8_t          data_buf[2 * sizeof(sample_sensor2_t)];
     memcpy(sample.sensor_name,
            BOARD_CONF_SENSOR2_NAME,
            sizeof(BOARD_CONF_SENSOR2_NAME));
     manikin_status_t status = MANIKIN_STATUS_OK;
     if (sensor_timer_2_trigger)
     {
-        status = sample_timer_start_cb_handler(
-            &(sensor2.timer_ctx), &(sensor2.sensor_ctx));
+        status = sample_timer_start_cb_handler(&(sensor2.timer_ctx),
+                                               &(sensor2.sensor_ctx));
         if (status == MANIKIN_STATUS_OK)
         {
             status = BOARD_CONF_SENSOR2_SAMPLE(&(sensor2.sensor_ctx), data_buf);
@@ -366,11 +370,14 @@ check_and_sample_sensor2 (uint8_t *data_buf)
 
     return status;
 }
+#endif
 
+#if BOARD_CONF_USE_SENSOR3
 manikin_status_t
-check_and_sample_sensor3 (uint8_t *data_buf)
+check_and_sample_sensor3 ()
 {
     sample_sensor3_t sample;
+    uint8_t          data_buf[2 * sizeof(sample_sensor3_t)];
     memcpy(sample.sensor_name,
            BOARD_CONF_SENSOR3_NAME,
            sizeof(BOARD_CONF_SENSOR3_NAME));
@@ -416,7 +423,7 @@ check_and_sample_sensor3 (uint8_t *data_buf)
 
     return status;
 }
-
+#endif
 
 /* Send data over CAN using ISO-TP */
 manikin_status_t
@@ -442,5 +449,20 @@ print_to_can (void)
         (void)isotp_send(&(sensor3.iso_tp_link), read_buf, len);
     }
 
+    return MANIKIN_STATUS_OK;
+}
+
+manikin_status_t
+check_and_sample_sensors ()
+{
+#ifdef BOARD_CONF_USE_SENSOR1
+    check_and_sample_sensor1();
+#endif
+#ifdef BOARD_CONF_USE_SENSOR2
+    check_and_sample_sensor2();
+#endif
+#ifdef BOARD_CONF_USE_SENSOR3
+    check_and_sample_sensor3();
+#endif
     return MANIKIN_STATUS_OK;
 }

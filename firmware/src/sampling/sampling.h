@@ -24,26 +24,7 @@ extern "C"
      */
     manikin_status_t init_peripherals_for_sensors();
 
-    /**
-     * @brief Checks and sample when sensor 1 has new measurement ready (poll
-     * timer flag)
-     * @param data_buf The buffer to store the resulting samples
-     */
-    manikin_status_t check_and_sample_sensor1(uint8_t *data_buf);
-
-    /**
-     * @brief Checks and sample when sensor 2 has new measurement ready (poll
-     * timer flag)
-     * @param data_buf The buffer to store the resulting samples
-     */
-    manikin_status_t check_and_sample_sensor2(uint8_t *data_buf);
-
-    /**
-     * @brief Checks and sample when sensor 3 has new measurement ready (poll
-     * timer flag)
-     * @param data_buf The buffer to store the resulting samples
-     */
-    manikin_status_t check_and_sample_sensor3(uint8_t *data_buf);
+    manikin_status_t check_and_sample_sensors();
 
     manikin_status_t start_sensor_sampling();
     manikin_status_t stop_sensor_sampling();

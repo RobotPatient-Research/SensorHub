@@ -5,13 +5,19 @@
 #include <stdint.h>
 #include "../sampling/sampling.h"
 #include "isotp.h"
+#include "SEGGER_RTT.h"
 
 extern IsoTpLink comm_link;
+#if BOARD_CONF_USE_SENSOR1
  size_t    sensor1_sample_id;
+#endif
+#if BOARD_CONF_USE_SENSOR2
  size_t    sensor2_sample_id;
+#endif
 #if BOARD_CONF_USE_SENSOR3
  size_t sensor3_sample_id;
 #endif
+uint8_t  comm_buf[128];
 
 typedef enum
 {
@@ -228,6 +234,20 @@ session_mgmt_on_usb_msg (uint8_t *msg, const size_t size)
             break;
         }
     }
+    return MANIKIN_STATUS_OK;
+}
+
+manikin_status_t session_mgmt_check_for_can_cmd() {
+        uint32_t recv_size;
+        int ret
+            = isotp_receive(&comm_link, comm_buf, sizeof(comm_buf), &recv_size);
+        if (ISOTP_RET_OK == ret)
+        {
+            /* Handle received message */
+            SEGGER_RTT_printf(0, "Received %d bytes:\n", recv_size);
+            SEGGER_RTT_printf(0, "%s\n", comm_buf);
+            session_mgmt_on_can_msg(comm_buf, recv_size);
+        }
     return MANIKIN_STATUS_OK;
 }
 
