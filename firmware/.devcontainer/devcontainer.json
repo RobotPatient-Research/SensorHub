@@ -9,7 +9,9 @@
 		"ghcr.io/devcontainers-extra/features/ccache-asdf:2": {},
 		"ghcr.io/devcontainers-extra/features/cmake:1": {},
 		"ghcr.io/devcontainers-extra/features/ninja-asdf:2": {}
-	}
+	},
+	"workspaceFolder": "/workspaces/SensorHub/firmware"
+
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},

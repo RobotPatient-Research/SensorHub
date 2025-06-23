@@ -6,6 +6,7 @@
 #include "lwrb/lwrb.h"
 
 #include <string.h>
+#include "flash.h"
 
 /* Local ring buffer for CLI input */
 static lwrb_t  cli_buffer;
@@ -64,6 +65,7 @@ manikin_cli_on_new_sensor_sample (const char    *sample_name,
     packet_data[encoded_len + 1] = '\n';
 
     lwrb_write(&cli_buffer, packet_data, encoded_len + 2U);
+    spi_flash_on_new_sample(packet_data, encoded_len+2);
     return encoded_len + 2U;
 }
 

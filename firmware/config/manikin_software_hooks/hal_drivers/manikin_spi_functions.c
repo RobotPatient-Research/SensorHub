@@ -61,7 +61,7 @@ spi_hal_init (manikin_spi_inst_t spi_inst, uint32_t baud)
     /* Associate the initialized DMA handle to the the SPI handle */
     __HAL_LINKDMA(&spi1_handle, hdmarx, hdma_rx);
     spi1_handle.Instance               = spi_inst;
-    spi1_handle.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
+    spi1_handle.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
     spi1_handle.Init.Direction         = SPI_DIRECTION_2LINES;
     spi1_handle.Init.CLKPhase          = SPI_PHASE_1EDGE;
     spi1_handle.Init.CLKPolarity       = SPI_POLARITY_LOW;

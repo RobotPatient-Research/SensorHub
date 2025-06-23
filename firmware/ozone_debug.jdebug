@@ -6,7 +6,7 @@
 
 File          : STM32F405_USB_CDC_Template/ozone_debug.jdebug
 Created       : 17 Feb 2025 13:25
-Ozone Version : V3.38c
+Ozone Version : V3.38f
 */
 
 /*********************************************************************
@@ -22,9 +22,8 @@ void OnProjectLoad (void) {
   //
   // Dialog-generated settings
   //
-  Project.AddPathSubstitute (".", "$(ProjectDir)");
-  Project.AddPathSubstitute (".", "$(ProjectDir)");
-  Project.SetDevice ("STM32F405RG");
+  Project.AddPathSubstitute ("/workspaces/SensorHub/firmware", "$(ProjectDir)");
+Project.SetDevice ("STM32F405RG");
   Project.SetHostIF ("USB", "");
   Project.SetTargetIF ("SWD");
   Project.SetTIFSpeed ("4 MHz");
@@ -35,7 +34,10 @@ void OnProjectLoad (void) {
   //
   Edit.SysVar (VAR_RTT_ENABLED, 1);
   Project.SetOSPlugin ("FreeRTOSPlugin_ARM");
+
+
   File.Open ("$(ProjectDir)/build/STM32F4_Sensor_Node.elf");
+
 }
 
 /*********************************************************************

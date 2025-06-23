@@ -73,7 +73,7 @@ FetchContent_Declare(
         LWRB
         GIT_REPOSITORY https://github.com/MaJerle/lwrb.git
         GIT_TAG v3.2.0
-        SOURCE_DIR {CMAKE_CURRENT_LIST_DIR}/external/lwrb
+        SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/external/lwrb
 )
 FetchContent_MakeAvailable(LWRB)
 
@@ -148,23 +148,30 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(isotp)
 
+add_library(flash_app_layer ${CMAKE_SOURCE_DIR}/src/flash/flash.c)
+target_include_directories(flash_app_layer PUBLIC ${CMAKE_SOURCE_DIR}/src/flash ${CMAKE_SOURCE_DIR}/external/RTT/RTT)
+target_link_libraries(flash_app_layer  lwrb manikin_software_libraries littlefs)
+
 set(MANIKIN_PHY_CAN_PLATFORM "STM32F4")
 add_subdirectory(config/manikin_software_hooks)
 target_link_libraries(manikin_software_libraries manikin_software_hooks)
 target_link_libraries(isotp CMSIS::STM32::F405RG)
+target_link_libraries(manikin_software_hooks flash_app_layer)
 # Create and link the target executable
-add_executable(${PROJECT_NAME} src/main.c
-        config/system_hooks/syscalls.c
-        config/system_hooks/hal_msp.c
-        config/system_hooks/interrupt_handler.c
-        config/system_hooks/error_handling.c
-        src/sampling/sampling.c
-        src/flash/flash.c
-        src/can/can_wrapper.c
-        src/session_mgmt/session_mgmt.c
-        external/RTT/RTT/SEGGER_RTT.c
-        external/RTT/RTT/SEGGER_RTT_printf.c
-        external/RTT/Syscalls/SEGGER_RTT_Syscalls_GCC.c)
+add_executable(${PROJECT_NAME}
+  ${CMAKE_SOURCE_DIR}/src/main.c
+  ${CMAKE_SOURCE_DIR}/config/system_hooks/syscalls.c
+  ${CMAKE_SOURCE_DIR}/config/system_hooks/hal_msp.c
+  ${CMAKE_SOURCE_DIR}/config/system_hooks/interrupt_handler.c
+  ${CMAKE_SOURCE_DIR}/config/system_hooks/error_handling.c
+  ${CMAKE_SOURCE_DIR}/src/sampling/sampling.c
+  ${CMAKE_SOURCE_DIR}/src/can/can_wrapper.c
+  ${CMAKE_SOURCE_DIR}/src/session_mgmt/session_mgmt.c
+  ${CMAKE_SOURCE_DIR}/external/RTT/RTT/SEGGER_RTT.c
+  ${CMAKE_SOURCE_DIR}/external/RTT/RTT/SEGGER_RTT_printf.c
+  ${CMAKE_SOURCE_DIR}/external/RTT/Syscalls/SEGGER_RTT_Syscalls_GCC.c
+)
+
 
 target_link_libraries(${PROJECT_NAME} CMSIS::STM32::F405RG
         HAL::STM32::F4::CORTEX
@@ -174,10 +181,11 @@ target_link_libraries(${PROJECT_NAME} CMSIS::STM32::F405RG
         HAL::STM32::F4::RCC
         HAL::STM32::F4::LL_USB
         HAL::STM32::F4::CAN
+        flash_app_layer
         STM32::NoSys
         USB_device_conf
         manikin_software_libraries
-        littlefs
+        manikin_software_hooks
         isotp
 )
 

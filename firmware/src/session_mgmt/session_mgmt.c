@@ -6,6 +6,7 @@
 #include "../sampling/sampling.h"
 #include "isotp.h"
 #include "SEGGER_RTT.h"
+#include "flash.h"
 
 #if BOARD_CONF_USE_SENSOR1
 size_t sensor1_sample_id;
@@ -16,11 +17,13 @@ size_t sensor2_sample_id;
 #if BOARD_CONF_USE_SENSOR3
 size_t sensor3_sample_id;
 #endif
-uint8_t comm_buf[128];
-
+static uint8_t comm_buf[128];
 IsoTpLink      comm_link;
 static uint8_t command_link_isotp_rx_buf[128];
 static uint8_t command_link_isotp_tx_buf[128];
+
+static lwrb_t  comm_link_ring_buf;
+static uint8_t comm_link_ring_buf_data[1024];
 
 typedef enum
 {
@@ -74,10 +77,19 @@ typedef struct
 } system_status_t;
 
 static system_status_t system_status;
+static char            latest_log_buffer[2048];
 
 manikin_status_t
 session_mgmt_init ()
 {
+    size_t len = spi_flash_get_log_history(sizeof(latest_log_buffer), latest_log_buffer);
+    if (len > 0)
+    {
+        printf("LEN: %d, Data: %s", len, latest_log_buffer);
+        spi_flash_clear_log();
+    }
+    lwrb_init(&comm_link_ring_buf, comm_link_ring_buf_data, sizeof(comm_link_ring_buf_data));
+    lwrb_write(&comm_link_ring_buf, latest_log_buffer, len);
     system_status.id               = BOARD_CONF_SENSORHUB_ID;
     system_status.state            = SYSTEM_STATE_INIT;
     system_status.flash_ok         = 1;

@@ -10,6 +10,7 @@
 #include "cli.h"
 #include "SEGGER_RTT.h"
 
+
 int
 main ()
 {
@@ -19,10 +20,11 @@ main ()
     SEGGER_RTT_Init();
     manikin_cli_init();
     MX_USB_DEVICE_Init();
-    session_mgmt_init();
     init_spi_flash_memory();
-    init_peripherals_for_sensors();
     init_can();
+    session_mgmt_init();
+    init_peripherals_for_sensors();
+
     uint16_t count = 0;
     while (1)
     {
@@ -36,6 +38,7 @@ main ()
         {
             print_to_can();
             manikin_cli_flush();
+            spi_flash_flush();
             count = 0;
         }
         can_phy_poll();

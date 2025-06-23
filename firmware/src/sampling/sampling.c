@@ -11,13 +11,21 @@
 #include "lwrb/lwrb.h"
 #include "isotp.h"
 #include "private/sampling_data_types.h"
+#include "manikin_platform.h"
 
+#define FILE_HASH 0xaf54d256
+#if BOARD_CONF_USE_SENSOR2
+#define MAX_SAMPLE_SIZE \
+    ((sizeof(sample_sensor1_t) > sizeof(sample_sensor2_t)) ? sizeof(sample_sensor1_t) : sizeof(sample_sensor2_t))
+
+#endif
+#if BOARD_CONF_USE_SENSOR3
 #define MAX_SAMPLE_SIZE                                                                                                \
     ((sizeof(sample_sensor1_t) > sizeof(sample_sensor2_t))                                                             \
          ? (sizeof(sample_sensor1_t) > sizeof(sample_sensor3_t) ? sizeof(sample_sensor1_t) : sizeof(sample_sensor3_t)) \
          : (sizeof(sample_sensor2_t) > sizeof(sample_sensor3_t) ? sizeof(sample_sensor2_t)                             \
                                                                 : sizeof(sample_sensor3_t)))
-
+#endif
 #if BOARD_CONF_USE_SENSOR1
 struct sensor_state sensor1 = { 0U };
 volatile uint8_t    sensor_timer_1_trigger;
@@ -128,7 +136,7 @@ init_i2c_sensor_struct (struct sensor_state *sensor,
     sensor->timer_ctx.frequency = sample_freq;
     sensor->timer_ctx.timer     = timer;
     sensor->timer_ctx.watchdog  = watchdog;
-
+    MANIKIN_I2C_HAL_INIT(i2c_inst, BOARD_CONF_I2C1_SPEED);
     return MANIKIN_STATUS_OK;
 }
 
@@ -189,7 +197,7 @@ init_peripherals_for_sensors (void)
     HAL_Delay(1000U);
     BOARD_CONF_TIMER_SENSOR_1_EN();
     init_i2c_sensor_struct(&sensor1,
-                           BOARD_CONF_I2C1_INSTANCE,
+                           BOARD_CONF_I2C0_INSTANCE,
                            BOARD_CONF_SENSOR1_ADDR,
                            BOARD_CONF_SENSOR1_SAMPLE_RATE_HZ,
                            BOARD_CONF_TIMER_SENSOR_1,
@@ -198,6 +206,12 @@ init_peripherals_for_sensors (void)
     if (status == MANIKIN_STATUS_OK)
     {
         sample_timer_init(&(sensor1.timer_ctx));
+        printf("Sensor 1 init success!\r\n");
+    }
+    else
+    {
+        printf("Sensor 1 init unsuccessful!\r\n");
+        non_critical_error(FILE_HASH, __LINE__);
     }
 #endif
 
@@ -206,7 +220,7 @@ init_peripherals_for_sensors (void)
     HAL_Delay(1000U);
     BOARD_CONF_TIMER_SENSOR_2_EN();
     init_i2c_sensor_struct(&sensor2,
-                           BOARD_CONF_I2C0_INSTANCE,
+                           BOARD_CONF_I2C1_INSTANCE,
                            BOARD_CONF_SENSOR2_ADDR,
                            BOARD_CONF_SENSOR2_SAMPLE_RATE_HZ,
                            BOARD_CONF_TIMER_SENSOR_2,
@@ -215,6 +229,12 @@ init_peripherals_for_sensors (void)
     if (status == MANIKIN_STATUS_OK)
     {
         sample_timer_init(&(sensor2.timer_ctx));
+        printf("Sensor 2 init success!\r\n");
+    }
+    else
+    {
+        printf("Sensor 2 init unsuccessful!\r\n");
+        non_critical_error(FILE_HASH, __LINE__);
     }
 #endif
 
@@ -223,7 +243,7 @@ init_peripherals_for_sensors (void)
     HAL_Delay(1000U);
     BOARD_CONF_TIMER_SENSOR_3_EN();
     init_i2c_sensor_struct(&sensor3,
-                           BOARD_CONF_I2C0_INSTANCE,
+                           BOARD_CONF_I2C1_INSTANCE,
                            BOARD_CONF_SENSOR3_ADDR,
                            BOARD_CONF_SENSOR3_SAMPLE_RATE_HZ,
                            BOARD_CONF_TIMER_SENSOR_3,
@@ -232,6 +252,12 @@ init_peripherals_for_sensors (void)
     if (status == MANIKIN_STATUS_OK)
     {
         sample_timer_init(&(sensor3.timer_ctx));
+        printf("Sensor 3 init success!\r\n");
+    }
+    else
+    {
+        printf("Sensor 3 init unsuccessful!\r\n");
+        non_critical_error(FILE_HASH, __LINE__);
     }
 #endif
 
@@ -258,7 +284,7 @@ check_and_sample_sensor1 ()
 
                 size_t len = manikin_cli_on_new_sensor_sample(
                     BOARD_CONF_SENSOR1_NAME, sensor1.sample_id, data_buf, sizeof(sample_sensor1_t));
-                if (len < sizeof(sample_sensor3_t))
+                if (len < sizeof(sample_sensor1_t))
                 {
                     return MANIKIN_STATUS_ERR_CONVERSION_FAILED;
                 }
@@ -299,7 +325,7 @@ check_and_sample_sensor2 ()
 
                 size_t len = manikin_cli_on_new_sensor_sample(
                     BOARD_CONF_SENSOR2_NAME, sensor2.sample_id, data_buf, sizeof(sample_sensor2_t));
-                if (len < sizeof(sample_sensor3_t))
+                if (len < sizeof(sample_sensor2_t))
                 {
                     return MANIKIN_STATUS_ERR_CONVERSION_FAILED;
                 }
@@ -366,35 +392,40 @@ manikin_status_t
 print_to_can (void)
 {
     uint8_t  read_buf[MAX_SAMPLE_SIZE];
+    #if BOARD_CONF_USE_SENSOR1
     uint32_t len = lwrb_read(&(sensor1.can_ringbuffer), read_buf, sizeof(sample_sensor1_t));
     if (len != 0U)
     {
         (void)isotp_send(&(sensor1.iso_tp_link), read_buf, len);
     }
+    #endif
+    #if BOARD_CONF_USE_SENSOR2
     len = lwrb_read(&(sensor2.can_ringbuffer), read_buf, sizeof(sample_sensor2_t));
     if (len != 0U)
     {
         (void)isotp_send(&(sensor2.iso_tp_link), read_buf, len);
     }
+    #endif
+    #if BOARD_CONF_USE_SENSOR3
     len = lwrb_read(&(sensor3.can_ringbuffer), read_buf, sizeof(sample_sensor3_t));
     if (len != 0U)
     {
         (void)isotp_send(&(sensor3.iso_tp_link), read_buf, len);
     }
-
+    #endif
     return MANIKIN_STATUS_OK;
 }
 
 manikin_status_t
 check_and_sample_sensors ()
 {
-#ifdef BOARD_CONF_USE_SENSOR1
+#if BOARD_CONF_USE_SENSOR1
     check_and_sample_sensor1();
 #endif
-#ifdef BOARD_CONF_USE_SENSOR2
+#if BOARD_CONF_USE_SENSOR2
     check_and_sample_sensor2();
 #endif
-#ifdef BOARD_CONF_USE_SENSOR3
+#if BOARD_CONF_USE_SENSOR3
     check_and_sample_sensor3();
 #endif
     return MANIKIN_STATUS_OK;
