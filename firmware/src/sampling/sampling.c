@@ -14,18 +14,21 @@
 #include "manikin_platform.h"
 
 #define FILE_HASH 0xaf54d256
-#if BOARD_CONF_USE_SENSOR2
-#define MAX_SAMPLE_SIZE \
-    ((sizeof(sample_sensor1_t) > sizeof(sample_sensor2_t)) ? sizeof(sample_sensor1_t) : sizeof(sample_sensor2_t))
 
-#endif
 #if BOARD_CONF_USE_SENSOR3
 #define MAX_SAMPLE_SIZE                                                                                                \
     ((sizeof(sample_sensor1_t) > sizeof(sample_sensor2_t))                                                             \
          ? (sizeof(sample_sensor1_t) > sizeof(sample_sensor3_t) ? sizeof(sample_sensor1_t) : sizeof(sample_sensor3_t)) \
          : (sizeof(sample_sensor2_t) > sizeof(sample_sensor3_t) ? sizeof(sample_sensor2_t)                             \
-                                                                : sizeof(sample_sensor3_t)))
+                                                          : sizeof(sample_sensor3_t)))
+#elif BOARD_CONF_USE_SENSOR2
+#define MAX_SAMPLE_SIZE \
+    ((sizeof(sample_sensor1_t) > sizeof(sample_sensor2_t)) ? sizeof(sample_sensor1_t) : sizeof(sample_sensor2_t))
+
+#elif BOARD_CONF_USE_SENSOR1
+#define MAX_SAMPLE_SIZE (sizeof(sample_sensor1_t))
 #endif
+
 #if BOARD_CONF_USE_SENSOR1
 struct sensor_state sensor1 = { 0U };
 volatile uint8_t    sensor_timer_1_trigger;

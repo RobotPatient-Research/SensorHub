@@ -9,6 +9,12 @@ extern "C"
 #include "manikin_timer_functions.h"
 #include "manikin_watchdog_functions.h"
 #include "manikin_error_functions.h"
+#include "manikin_timing_functions.h"
+
+/**
+ * @brief Manikin Delay uS
+ */
+#define MANIKIN_DELAY_US(us) manikin_hal_delay_us(us)
 
 /**
  * @brief Manikin I2C HAL init binding

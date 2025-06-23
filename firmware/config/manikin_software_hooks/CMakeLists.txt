@@ -1,5 +1,6 @@
 add_library(manikin_software_hooks hal_drivers/manikin_i2c_functions.c
                                    hal_drivers/manikin_timer_functions.c
+                                   hal_drivers/manikin_timing_functions.c
                                    hal_drivers/manikin_watchdog_functions.c
                                    hal_drivers/manikin_spi_functions.c
                                    hal_drivers/manikin_error_functions.c)

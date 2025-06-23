@@ -7,11 +7,9 @@ extern "C"
 
 #include "stm32f405xx.h"
 /* Sensor includes */
-#include "vl6180x/vl6180x.h"
-#include "ads7138/ads7138.h"
-#include "sdp810/sdp810.h"
+#include "bhi360_fusion/bhi360_fusion.h"
 
-#define BOARD_CONF_SENSORHUB_ID 1U
+#define BOARD_CONF_SENSORHUB_ID 2U
 
 /**
  * CAN Configuration
@@ -30,15 +28,15 @@ extern "C"
 
 #define BOARD_CONF_CAN_CLK_EN() __HAL_RCC_CAN1_CLK_ENABLE()
 
-#define BOARD_CONF_CAN_SENSOR1_TX_ID 0x080
-#define BOARD_CONF_CAN_SENSOR1_RX_ID 0x180U
-#define BOARD_CONF_CAN_SENSOR2_TX_ID 0x01U
+#define BOARD_CONF_CAN_SENSOR1_TX_ID 0x060
+#define BOARD_CONF_CAN_SENSOR1_RX_ID 0x160U
+#define BOARD_CONF_CAN_SENSOR2_TX_ID 0x201U
 #define BOARD_CONF_CAN_SENSOR2_RX_ID 0x101U
 #define BOARD_CONF_CAN_SENSOR3_TX_ID 0x050U
 #define BOARD_CONF_CAN_SENSOR3_RX_ID 0x150U
 
-#define BOARD_CONF_CAN_STATUS_TX_ID 0x10U
-#define BOARD_CONF_CAN_STATUS_RX_ID 0x201U
+#define BOARD_CONF_CAN_STATUS_TX_ID 0x121U
+#define BOARD_CONF_CAN_STATUS_RX_ID 0x120U
 
 #define BOARD_CONF_CAN_GLOBAL_BRDCAST_RX_ID 0x0U
 /**
@@ -94,23 +92,23 @@ extern "C"
     /**************************************/
 
 #define BOARD_CONF_USE_SENSOR1 1
-#define BOARD_CONF_USE_SENSOR2 1
-#define BOARD_CONF_USE_SENSOR3 1
+#define BOARD_CONF_USE_SENSOR2 0
+#define BOARD_CONF_USE_SENSOR3 0
 
 /**
  * Sensor 1 configuration
  */
 #if BOARD_CONF_USE_SENSOR1
-#define BOARD_CONF_SENSOR1_NAME                                "vl6180"
+#define BOARD_CONF_SENSOR1_NAME                                "BHI360FUS"
 #define BOARD_CONF_SENSOR1_RESET_PORT                          GPIOA
 #define BOARD_CONF_SENSOR1_RESET_PIN                           GPIO_PIN_9
 #define BOARD_CONF_SENSOR1_ADDR                                0x29
-#define BOARD_CONF_SENSOR1_SAMPLE_RATE_HZ                      100
-#define BOARD_CONF_SENSOR1_INIT(sensor_ctx)                    vl6180x_init_sensor(sensor_ctx)
-#define BOARD_CONF_SENSOR1_SAMPLE(sensor_ctx, read_buf)        vl6180x_read_sensor(sensor_ctx, read_buf)
-#define BOARD_CONF_SENSOR1_DEINIT(sensor_ctx)                  vl6180x_deinit_sensor(sensor_ctx)
-#define BOARD_CONF_SENSOR1_SAMPLE_T                            vl6180x_sample_data_t
-#define BOARD_CONF_SENSOR1_SAMPLE_PARSE(read_buf, sample_data) vl6180x_parse_raw_data(read_buf, sample_data)
+#define BOARD_CONF_SENSOR1_SAMPLE_RATE_HZ                      10
+#define BOARD_CONF_SENSOR1_INIT(sensor_ctx)                    bhi360_fusion_init_sensor(sensor_ctx)
+#define BOARD_CONF_SENSOR1_SAMPLE(sensor_ctx, read_buf)        bhi360_fusion_read_sensor(sensor_ctx, read_buf)
+#define BOARD_CONF_SENSOR1_DEINIT(sensor_ctx)                  bhi360_fusion_deinit_sensor(sensor_ctx)
+#define BOARD_CONF_SENSOR1_SAMPLE_T                            bhi360_fusion_sample_data_t
+#define BOARD_CONF_SENSOR1_SAMPLE_PARSE(read_buf, sample_data) bhi360_fusion_parse_raw_data(read_buf, sample_data)
 #endif // BOARD_CONF_USE_SENSOR1
 
 /**
