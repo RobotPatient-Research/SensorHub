@@ -22,15 +22,28 @@ RUN microdnf update -y && \
 # Add non-root user for VS Code Dev Container usage
 RUN useradd -m vscode && echo "vscode ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/vscode
 
-# Install the ARM toolchain manually
-# Example: ARM GNU Toolchain 12.3 rel1
-ENV ARM_URL=https://developer.arm.com/-/media/Files/downloads/gnu/14.2.rel1/binrel/arm-gnu-toolchain-14.2.rel1-x86_64-arm-none-eabi.tar.xz
+# Base URL and version prefix
+ENV ARM_BASE_URL=https://developer.arm.com/-/media/Files/downloads/gnu/14.2.rel1/binrel
+ENV ARM_VERSION=14.2.rel1
 ENV ARM_DIR=/opt/arm-toolchain
 
-RUN curl -L $ARM_URL -o /tmp/arm-toolchain.tar.xz && \
+# Determine ARCH and set URL accordingly
+# This works for both x86_64 and arm64 (Apple M1/M2)
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then \
+      ARM_URL="$ARM_BASE_URL/arm-gnu-toolchain-${ARM_VERSION}-x86_64-arm-none-eabi.tar.xz"; \
+    elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then \
+      ARM_URL="$ARM_BASE_URL/arm-gnu-toolchain-${ARM_VERSION}-aarch64-arm-none-eabi.tar.xz"; \
+    else \
+      echo "Unsupported architecture: $ARCH"; exit 1; \
+    fi && \
+    echo "Downloading $ARM_URL" && \
+    curl -L "$ARM_URL" -o /tmp/arm-toolchain.tar.xz && \
     tar -xJf /tmp/arm-toolchain.tar.xz -C /opt && \
-    ln -s "/opt/arm-gnu-toolchain-14.2.rel1-x86_64-arm-none-eabi" "$ARM_DIR" && \
+    TOOLCHAIN_DIR=$(tar -tf /tmp/arm-toolchain.tar.xz | head -1 | cut -f1 -d"/") && \
+    ln -s "/opt/$TOOLCHAIN_DIR" "$ARM_DIR" && \
     rm /tmp/arm-toolchain.tar.xz
+
 
 
 # Add to PATH
