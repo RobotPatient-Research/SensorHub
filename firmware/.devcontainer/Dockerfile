@@ -1,20 +1,44 @@
-FROM mcr.microsoft.com/devcontainers/cpp:1-debian-12
+# Use UBI9-minimal as base
+FROM registry.access.redhat.com/ubi9-minimal
 
-ARG REINSTALL_CMAKE_VERSION_FROM_SOURCE="3.22.2"
+# Install core build & runtime tools
+RUN microdnf update -y && \
+    microdnf install -y \
+    bash \
+    tar \
+    git \
+    vim \
+    shadow-utils \
+    xz \
+    ninja-build \
+    cmake \
+    sudo \
+    gdb \
+    gcc \
+    make \
+    binutils \
+    && microdnf clean all
 
-# Optionally install the cmake for vcpkg
-COPY ./reinstall-cmake.sh /tmp/
+# Add non-root user for VS Code Dev Container usage
+RUN useradd -m vscode && echo "vscode ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/vscode
 
-RUN sudo apt-get update && sudo apt-get install gcc-arm-none-eabi libnewlib-arm-none-eabi -y
+# Install the ARM toolchain manually
+# Example: ARM GNU Toolchain 12.3 rel1
+ENV ARM_URL=https://developer.arm.com/-/media/Files/downloads/gnu/14.2.rel1/binrel/arm-gnu-toolchain-14.2.rel1-x86_64-arm-none-eabi.tar.xz
+ENV ARM_DIR=/opt/arm-toolchain
 
-RUN if [ "${REINSTALL_CMAKE_VERSION_FROM_SOURCE}" != "none" ]; then \
-        chmod +x /tmp/reinstall-cmake.sh && /tmp/reinstall-cmake.sh ${REINSTALL_CMAKE_VERSION_FROM_SOURCE}; \
-    fi \
-    && rm -f /tmp/reinstall-cmake.sh
+RUN curl -L $ARM_URL -o /tmp/arm-toolchain.tar.xz && \
+    tar -xJf /tmp/arm-toolchain.tar.xz -C /opt && \
+    ln -s "/opt/arm-gnu-toolchain-14.2.rel1-x86_64-arm-none-eabi" "$ARM_DIR" && \
+    rm /tmp/arm-toolchain.tar.xz
 
-# [Optional] Uncomment this section to install additional vcpkg ports.
-# RUN su vscode -c "${VCPKG_ROOT}/vcpkg install <your-port-name-here>"
 
-# [Optional] Uncomment this section to install additional packages.
-# RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-#     && apt-get -y install --no-install-recommends <your-package-list-here>
+# Add to PATH
+ENV PATH="$ARM_DIR/bin:${PATH}"
+
+# Switch to dev user
+USER vscode
+WORKDIR /workspace
+
+# Default command (for devcontainer)
+CMD ["sleep", "infinity"]
