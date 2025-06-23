@@ -1,0 +1,48 @@
+@startuml
+title SensorHub Firmware Build System - Build-system Architecture
+
+skinparam rectangle {
+  BackgroundColor<<Host>> #f9f9f9
+  BackgroundColor<<Container>> #d0e4f5
+  BackgroundColor<<Tooling>> #f0f0f0
+  BackgroundColor<<Source>> #dff0d8
+  BackgroundColor<<Baremetal>> #fbeed5
+  BorderColor black
+}
+
+rectangle "Developer Host OS\n(Windows / macOS / Linux)" <<Host>> {
+  rectangle "Docker\nDefines the container image" <<Container>> {
+    rectangle "Dev Tools\nVS Code Remote Containers" <<Tooling>>
+    rectangle "Build Toolchain\narm-none-eabi-gcc\nCMake, Ninja" <<Tooling>>
+  }
+}
+
+rectangle "Source Code & Configuration" <<Source>> {
+  rectangle "CMakeLists.txt\nBuild configuration" <<Source>>
+  rectangle "STM32-CMake\nToolchain support" <<Source>>
+  rectangle "STM32Cube HAL & LL\n(Fetched automatically)" <<Source>>
+  rectangle "External Libraries\n(lwrb, CBOR, littlefs, ISO-TP, SEGGER RTT)" <<Source>>
+  rectangle "Project Source Code\n(src/, config/)" <<Source>>
+}
+
+rectangle "Target Firmware\nBare-Metal Executable (.hex)" <<Baremetal>> {
+  rectangle "Runs on STM32F405RG\nNo OS (bare-metal)\nUses HAL & LL drivers" <<Baremetal>>
+}
+
+'. Relationships
+"Code IDE (VSCode/CLion)" --> "Docker\nDefines the container image"
+"Docker\nDefines the container image" --> "Dev Tools\nVS Code Remote Containers"
+"Docker\nDefines the container image" --> "Build Toolchain\narm-none-eabi-gcc\nCMake, Ninja"
+
+"Build Toolchain\narm-none-eabi-gcc\nCMake, Ninja" --> "CMakeLists.txt\nBuild configuration"
+"Build Toolchain\narm-none-eabi-gcc\nCMake, Ninja" --> "STM32-CMake\nToolchain support"
+"Build Toolchain\narm-none-eabi-gcc\nCMake, Ninja" --> "STM32Cube HAL & LL\n(Fetched automatically)"
+"Build Toolchain\narm-none-eabi-gcc\nCMake, Ninja" --> "External Libraries\n(lwrb, CBOR, littlefs, ISO-TP, SEGGER RTT)"
+"Build Toolchain\narm-none-eabi-gcc\nCMake, Ninja" --> "Project Source Code\n(src/, config/)"
+
+"CMakeLists.txt\nBuild configuration" --> "Target Firmware\nBare-Metal Executable (.hex)"
+"STM32-CMake\nToolchain support" --> "Target Firmware\nBare-Metal Executable (.hex)"
+"STM32Cube HAL & LL\n(Fetched automatically)" --> "Target Firmware\nBare-Metal Executable (.hex)"
+"External Libraries\n(lwrb, CBOR, littlefs, ISO-TP, SEGGER RTT)" --> "Target Firmware\nBare-Metal Executable (.hex)"
+"Project Source Code\n(src/, config/)" --> "Target Firmware\nBare-Metal Executable (.hex)"
+@enduml
