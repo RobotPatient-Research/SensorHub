@@ -97,7 +97,7 @@ init_i2c0_pins (void)
 
     return MANIKIN_STATUS_OK;
 }
-
+#if BOARD_CONF_USE_SENSOR2
 /* I2C1 pin init */
 static manikin_status_t
 init_i2c1_pins (void)
@@ -125,7 +125,7 @@ init_i2c1_pins (void)
     BOARD_CONF_I2C1_CLK_EN();
     return MANIKIN_STATUS_OK;
 }
-
+#endif
 static inline manikin_status_t
 init_i2c_sensor_struct (struct sensor_state *sensor,
                         I2C_TypeDef         *i2c_inst,
@@ -193,8 +193,9 @@ init_peripherals_for_sensors (void)
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
     init_i2c0_pins();
+#if BOARD_CONF_USE_SENSOR2
     init_i2c1_pins();
-
+#endif
 #if BOARD_CONF_USE_SENSOR1
     lwrb_init(&(sensor1.can_ringbuffer), (sensor1.can_ringbuffer_data), sizeof(sensor1.can_ringbuffer_data));
     HAL_Delay(1000U);

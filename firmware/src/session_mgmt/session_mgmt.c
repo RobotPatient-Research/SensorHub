@@ -98,14 +98,18 @@ session_mgmt_init ()
     system_status.sensor1_sr       = BOARD_CONF_SENSOR1_SAMPLE_RATE_HZ;
     system_status.sensor1_health   = SENSOR_STATUS_OK;
     system_status.sensor2_faultcnt = 0;
-    system_status.sensor2_sr       = BOARD_CONF_SENSOR2_SAMPLE_RATE_HZ;
-    system_status.sensor2_health   = SENSOR_STATUS_OK;
+#if BOARD_CONF_USE_SENSOR2
+    system_status.sensor2_sr     = BOARD_CONF_SENSOR2_SAMPLE_RATE_HZ;
+    system_status.sensor2_health = SENSOR_STATUS_OK;
+#endif
     memcpy((system_status.sensor1_name),
            BOARD_CONF_SENSOR1_NAME,
            sizeof(BOARD_CONF_SENSOR1_NAME) <= 8 ? sizeof(BOARD_CONF_SENSOR1_NAME) : 8);
+#if BOARD_CONF_USE_SENSOR2
     memcpy((system_status.sensor2_name),
            BOARD_CONF_SENSOR2_NAME,
            sizeof(BOARD_CONF_SENSOR2_NAME) <= 8 ? sizeof(BOARD_CONF_SENSOR2_NAME) : 8);
+#endif
     isotp_init_link(&comm_link,
                     BOARD_CONF_CAN_STATUS_TX_ID,
                     command_link_isotp_tx_buf,
@@ -123,7 +127,9 @@ session_mgmt_on_global_can_msg (uint8_t *msg, const size_t dlc)
         if (msg[0] == SYSTEM_CMD_START)
         {
             sensor1_sample_id = 0;
+#if BOARD_CONF_USE_SENSOR2
             sensor2_sample_id = 0;
+#endif
 #if BOARD_CONF_USE_SENSOR3
             sensor3_sample_id = 0;
 #endif
@@ -161,8 +167,10 @@ session_mgmt_on_can_msg (uint8_t *msg, const size_t dlc)
             break;
         }
         case SYSTEM_CMD_GET_NUM_SAMPLES_SENSOR_2: {
+#if BOARD_CONF_USE_SENSOR2
             memcpy(transmit_buffer, &sensor2_sample_id, sizeof(size_t));
             isotp_send(&comm_link, transmit_buffer, sizeof(size_t));
+#endif
             break;
         }
         case SYSTEM_CMD_GET_NUM_SAMPLES_SENSOR_3: {
@@ -218,9 +226,11 @@ session_mgmt_on_usb_msg (uint8_t *msg, const size_t size)
             break;
         }
         case SYSTEM_CMD_GET_NUM_SAMPLES_SENSOR_2: {
+#if BOARD_CONF_USE_SENSOR2
             memcpy(transmit_buffer, &sensor2_sample_id, sizeof(size_t));
             // isotp_send(&comm_link, transmit_buffer, sizeof(size_t));
             CDC_Transmit_FS(transmit_buffer, sizeof(size_t));
+#endif
             break;
         }
         case SYSTEM_CMD_GET_NUM_SAMPLES_SENSOR_3: {

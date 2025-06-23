@@ -4,9 +4,9 @@ option(BUILD_SENSORHUB_1 "Build firmware for the SensorHub1 (conf in config/boar
 option(BUILD_SENSORHUB_HEAD "Build firmware for the SensorHub in the head of manikin (conf in config/board_conf/conf_sensorhub1)" OFF)
 
 if (BUILD_SENSORHUB_1 AND BUILD_SENSORHUB_HEAD)
-    set(BUILD_SENSORHUB_1 OFF)
+    set(BUILD_SENSORHUB_1 OFF CACHE BOOL "desc" FORCE)
 elseif (BUILD_SENSORHUB_1 EQUAL OFF AND BUILD_SENSORHUB_HEAD EQUAL OFF)
-    set(BUILD_SENSORHUB_1 ON)
+    set(BUILD_SENSORHUB_1 ON CACHE BOOL "desc" FORCE)
 endif ()
 
 include(FetchContent)
@@ -24,7 +24,7 @@ FetchContent_MakeAvailable(stm32-cmake)
 # Set Toolchain-file so that CMake knows what toolchain to use, with which linker & compilation options
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/external/stm32-cmake/cmake/stm32_gcc.cmake)
 
-project(STM32F4_Sensor_Node C CXX ASM)
+project(SensorHub_FW C CXX ASM)
 
 # Project Settings:
 #
